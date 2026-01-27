@@ -20,7 +20,14 @@ import { OptionFormCompatibility } from "@/components/configurator/admin/OptionF
 import { OptionAttributeValues } from "@/components/configurator/admin/OptionAttributeValues";
 import { Stepper } from "@/components/ui/stepper";
 import { ImageUploadWithCropRef } from "@/components/configurator/admin/ImageUploadWithCrop";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Save,
+  Plus,
+  X,
+} from "lucide-react";
 
 interface AdminDialogProps {
   open: boolean;
@@ -483,14 +490,30 @@ export function AdminDialog({
                     <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 ) : (
-                  <Button type="submit" className="flex-1" disabled={isSaving}>
+                  <Button
+                    type="submit"
+                    className="flex-1 gap-2"
+                    disabled={isSaving}
+                  >
                     {isSaving ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                         Saving...
                       </>
                     ) : (
-                      <>{editingOption ? "Update Option" : "Add Option"}</>
+                      <>
+                        {editingOption ? (
+                          <>
+                            <Save className="h-4 w-4" />
+                            Update Option
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4" />
+                            Add Option
+                          </>
+                        )}
+                      </>
                     )}
                   </Button>
                 )}
@@ -502,19 +525,36 @@ export function AdminDialog({
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
-                  className="flex-1"
+                  className="flex-1 gap-2"
                   disabled={isSaving}
                 >
+                  <X className="h-4 w-4" />
                   Cancel
                 </Button>
-                <Button type="submit" className="flex-1" disabled={isSaving}>
+                <Button
+                  type="submit"
+                  className="flex-1 gap-2"
+                  disabled={isSaving}
+                >
                   {isSaving ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                       Saving...
                     </>
                   ) : (
-                    <>{editingCategory ? "Update Category" : "Add Category"}</>
+                    <>
+                      {editingCategory ? (
+                        <>
+                          <Save className="h-4 w-4" />
+                          Update Category
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4" />
+                          Add Category
+                        </>
+                      )}
+                    </>
                   )}
                 </Button>
               </>

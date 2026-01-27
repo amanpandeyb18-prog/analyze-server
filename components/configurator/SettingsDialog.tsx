@@ -14,7 +14,7 @@ import {
   Currency,
   EmailTemplate,
 } from "@/components/configurator/types/settings";
-import { Settings, DollarSign, Mail, Eye } from "lucide-react";
+import { Settings, DollarSign, Mail, Eye, Loader2 } from "lucide-react";
 import { toast } from "@/components/configurator/hooks/use-toast";
 
 interface SettingsDialogProps {
@@ -54,8 +54,17 @@ export function SettingsDialog({
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(
     null,
   );
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCurrencyChange = async (newCurrency: Currency) => {
+    setIsProcessing(true);
+
+    // Show processing toast
+    toast({
+      title: "Processing changes...",
+      description: "Updating currency settings",
+    });
+
     try {
       // Update backend if configuratorId exists
       if (configuratorId) {
@@ -92,6 +101,8 @@ export function SettingsDialog({
         variant: "destructive",
       });
       throw error;
+    } finally {
+      setIsProcessing(false);
     }
   };
 

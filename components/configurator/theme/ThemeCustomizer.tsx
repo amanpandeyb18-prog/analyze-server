@@ -13,9 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { predefinedColors } from "@/components/configurator/data/themeColors";
 import { ThemePreview } from "@/components/configurator/theme/ThemePreview";
 import { Theme, TextColorMode } from "@/components/configurator/types/theme";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, RotateCcw, CheckCircle, X, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "@/components/configurator/hooks/use-toast";
 
 interface ThemeCustomizerProps {
   open: boolean;
@@ -44,6 +45,7 @@ export function ThemeCustomizer({
   const [customTextColor, setCustomTextColor] = useState(
     currentTheme?.customTextColor || "#ffffff",
   );
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (currentTheme) {
@@ -66,18 +68,49 @@ export function ThemeCustomizer({
     }
   };
 
-  const handleApply = () => {
-    onUpdateTheme({
-      primaryColor: selectedColor,
-      textColorMode,
-      customTextColor: textColorMode === "CUSTOM" ? customTextColor : undefined,
+  const handleApply = async () => {
+    setIsProcessing(true);
+
+    // Show processing toast
+    toast({
+      title: "Processing changes...",
+      description: "Applying your theme customization",
     });
-    onOpenChange(false);
+
+    try {
+      await onUpdateTheme({
+        primaryColor: selectedColor,
+        textColorMode,
+        customTextColor:
+          textColorMode === "CUSTOM" ? customTextColor : undefined,
+      });
+      onOpenChange(false);
+    } catch (error) {
+      // Error toast is handled by useTheme hook
+      console.error("Failed to apply theme:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const handleReset = () => {
-    onResetTheme();
-    onOpenChange(false);
+  const handleReset = async () => {
+    setIsProcessing(true);
+
+    // Show processing toast
+    toast({
+      title: "Processing changes...",
+      description: "Resetting theme to default",
+    });
+
+    try {
+      await onResetTheme();
+      onOpenChange(false);
+    } catch (error) {
+      // Error toast is handled by useTheme hook
+      console.error("Failed to reset theme:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -242,6 +275,7 @@ export function ThemeCustomizer({
             type="button"
             variant="outline"
             onClick={handleReset}
+            disabled={isProcessing}
             className="gap-2"
           >
             <RotateCcw className="h-4 w-4" />
@@ -252,11 +286,29 @@ export function ThemeCustomizer({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={isProcessing}
+            className="gap-2"
           >
+            <X className="h-4 w-4" />
             Cancel
           </Button>
-          <Button type="button" onClick={handleApply}>
-            Apply Theme
+          <Button
+            type="button"
+            onClick={handleApply}
+            disabled={isProcessing}
+            className="gap-2"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4" />
+                Apply Theme
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>
