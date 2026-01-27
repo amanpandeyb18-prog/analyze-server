@@ -111,13 +111,15 @@ export function ExportDialog({
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(0, 0, 0);
-        const optionText = quantity > 1 ? `${option.label} (x${quantity})` : option.label;
+        const optionText =
+          quantity > 1 ? `${option.label} (x${quantity})` : option.label;
         doc.text(optionText, margin + 5, yPos);
 
         // Price (right aligned) - show item total if quantity > 1
-        const priceText = quantity > 1 
-          ? `${formatPrice(option.price)} each = ${formatPrice(itemTotal)}`
-          : formatPrice(option.price);
+        const priceText =
+          quantity > 1
+            ? `${formatPrice(option.price)} each = ${formatPrice(itemTotal)}`
+            : formatPrice(option.price);
         const priceWidth = doc.getTextWidth(priceText);
         doc.text(priceText, pageWidth - margin - priceWidth, yPos);
         yPos += 7;
@@ -237,7 +239,8 @@ export function ExportDialog({
                   <span className="text-sm font-semibold text-foreground">
                     {quantity > 1 ? (
                       <span>
-                        {formatPrice(option.price)} x {quantity} = {formatPrice(itemTotal)}
+                        {formatPrice(option.price)} x {quantity} ={" "}
+                        {formatPrice(itemTotal)}
                       </span>
                     ) : (
                       formatPrice(option.price)
@@ -245,7 +248,10 @@ export function ExportDialog({
                   </span>
                 </div>
                 <h4 className="font-semibold text-foreground mb-1">
-                  {option.label} {quantity > 1 && <span className="text-primary">(x{quantity})</span>}
+                  {option.label}{" "}
+                  {quantity > 1 && (
+                    <span className="text-primary">(x{quantity})</span>
+                  )}
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   {option.description}

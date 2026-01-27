@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileText } from "lucide-react";
+import { formatPrice } from "@/components/configurator/utils/formatPrice";
+import { getLocaleForCurrency, getDecimalPlaces } from "@/lib/currency-utils";
 
 interface Quote {
   id: string;
@@ -11,6 +13,9 @@ interface Quote {
   client: {
     name: string;
     email: string;
+  };
+  configurator?: {
+    currency?: string;
   };
 }
 
@@ -43,34 +48,47 @@ export function RecentQuotesTable({ quotes }: RecentQuotesTableProps) {
       <CardContent>
         <div className="space-y-3">
           {quotes.length > 0 ? (
-            quotes.map((quote) => (
-              <div
-                key={quote.id}
-                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">
-                    {quote.client.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {quote.customerEmail}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 ml-4">
-                  <div className="text-right">
-                    <p className="font-semibold text-sm">
-                      ${Number.parseFloat(quote.totalPrice).toFixed(2)}
+            quotes.map((quote) => {
+              // Get currency from configurator, default to USD
+              const currencyCode = quote.configurator?.currency || "USD";
+              const locale = getLocaleForCurrency(currencyCode);
+              const { min, max } = getDecimalPlaces(currencyCode);
+
+              // Format price with proper locale-aware formatting
+              const formattedPrice = formatPrice(quote.totalPrice, {
+                currencyCode,
+                locale,
+                minimumFractionDigits: min,
+                maximumFractionDigits: max,
+              });
+
+              return (
+                <div
+                  key={quote.id}
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">
+                      {quote.client.name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(quote.createdAt).toLocaleDateString()}
+                    <p className="text-xs text-muted-foreground truncate">
+                      {quote.customerEmail}
                     </p>
                   </div>
-                  <Badge className={getStatusColor(quote.status)}>
-                    {quote.status}
-                  </Badge>
+                  <div className="flex items-center gap-3 ml-4">
+                    <div className="text-right">
+                      <p className="font-semibold text-sm">{formattedPrice}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(quote.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge className={getStatusColor(quote.status)}>
+                      {quote.status}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
               No quotes yet

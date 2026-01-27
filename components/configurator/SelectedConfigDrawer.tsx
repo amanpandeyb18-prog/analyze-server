@@ -9,7 +9,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ConfigCategory, SelectedConfig, SelectedQuantities } from "@/components/configurator/types/configurator";
+import {
+  ConfigCategory,
+  SelectedConfig,
+  SelectedQuantities,
+} from "@/components/configurator/types/configurator";
 import { useCurrency } from "@/components/configurator/contexts/CurrencyContext";
 import { List, Plus, Minus } from "lucide-react";
 
@@ -105,18 +109,21 @@ export function SelectedConfigDrawer({
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => {
-                              const currentQty = selectedQuantities[category.id] || 1;
+                              const currentQty =
+                                selectedQuantities[category.id] || 1;
                               if (currentQty > 1) {
                                 onQuantityChange(category.id, currentQty - 1);
                               }
                             }}
                             data-testid={`mobile-decrement-quantity-${category.id}`}
                             className="h-9 w-9 rounded-md border-2 border-primary bg-background active:bg-accent flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                            disabled={(selectedQuantities[category.id] || 1) <= 1}
+                            disabled={
+                              (selectedQuantities[category.id] || 1) <= 1
+                            }
                           >
                             <Minus className="h-4 w-4 text-primary" />
                           </button>
-                          <span 
+                          <span
                             className="text-lg font-bold text-foreground min-w-[3rem] text-center"
                             data-testid={`mobile-quantity-display-${category.id}`}
                           >
@@ -124,7 +131,8 @@ export function SelectedConfigDrawer({
                           </span>
                           <button
                             onClick={() => {
-                              const currentQty = selectedQuantities[category.id] || 1;
+                              const currentQty =
+                                selectedQuantities[category.id] || 1;
                               onQuantityChange(category.id, currentQty + 1);
                             }}
                             data-testid={`mobile-increment-quantity-${category.id}`}
@@ -136,7 +144,11 @@ export function SelectedConfigDrawer({
                       </div>
                       {option.price > 0 && (
                         <div className="mt-2 text-sm font-medium text-foreground text-right">
-                          Subtotal: {formatPrice(option.price * (selectedQuantities[category.id] || 1))}
+                          Subtotal:{" "}
+                          {formatPrice(
+                            option.price *
+                              (selectedQuantities[category.id] || 1),
+                          )}
                         </div>
                       )}
                     </div>

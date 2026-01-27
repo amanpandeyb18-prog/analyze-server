@@ -44,7 +44,8 @@ function configReducer(state: ConfigState, action: Action): ConfigState {
   switch (action.type) {
     case "SELECT_OPTION":
       // When selecting an option, initialize quantity to 1 if it's a new selection
-      const isNewSelection = state.selectedConfig[action.categoryId] !== action.optionId;
+      const isNewSelection =
+        state.selectedConfig[action.categoryId] !== action.optionId;
       return {
         ...state,
         selectedConfig: {
@@ -54,7 +55,9 @@ function configReducer(state: ConfigState, action: Action): ConfigState {
         selectedQuantities: {
           ...state.selectedQuantities,
           // Set quantity to 1 for new selections, keep existing for re-selections
-          [action.categoryId]: isNewSelection ? 1 : (state.selectedQuantities[action.categoryId] || 1),
+          [action.categoryId]: isNewSelection
+            ? 1
+            : state.selectedQuantities[action.categoryId] || 1,
         },
       };
 
@@ -111,7 +114,7 @@ function configReducer(state: ConfigState, action: Action): ConfigState {
         categories: state.categories.map((cat) =>
           cat.id === action.category.id
             ? normalizeCategory(action.category)
-            : cat
+            : cat,
         ),
       };
 
@@ -119,7 +122,7 @@ function configReducer(state: ConfigState, action: Action): ConfigState {
       return {
         ...state,
         categories: state.categories.filter(
-          (cat) => cat.id !== action.categoryId
+          (cat) => cat.id !== action.categoryId,
         ),
       };
 
@@ -132,7 +135,7 @@ function configReducer(state: ConfigState, action: Action): ConfigState {
                 ...cat,
                 options: [...cat.options, action.option],
               }
-            : cat
+            : cat,
         ),
       };
 
@@ -144,10 +147,10 @@ function configReducer(state: ConfigState, action: Action): ConfigState {
             ? {
                 ...cat,
                 options: cat.options.map((opt) =>
-                  opt.id === action.option.id ? action.option : opt
+                  opt.id === action.option.id ? action.option : opt,
                 ),
               }
-            : cat
+            : cat,
         ),
       };
 
@@ -159,10 +162,10 @@ function configReducer(state: ConfigState, action: Action): ConfigState {
             ? {
                 ...cat,
                 options: cat.options.filter(
-                  (opt) => opt.id !== action.optionId
+                  (opt) => opt.id !== action.optionId,
                 ),
               }
-            : cat
+            : cat,
         ),
       };
 
@@ -178,7 +181,6 @@ function configReducer(state: ConfigState, action: Action): ConfigState {
    HOOK
 ------------------------------------------------------- */
 export function useConfiguration(apiCategories: ConfigCategory[]) {
-
   const initialCategories = apiCategories.map(normalizeCategory);
 
   const initialSelectedConfig = Object.fromEntries(
@@ -192,7 +194,7 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
       // Default: pick a free option if exists
       const freeOpt = cat.options.find((opt) => opt.price === 0);
       return [cat.id, freeOpt?.id || ""];
-    })
+    }),
   );
 
   const [state, dispatch] = useReducer(configReducer, {
@@ -228,7 +230,7 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
 
   const validateAndAdjustSelections = (
     selectedConfig: Record<string, string>,
-    categories: ConfigCategory[]
+    categories: ConfigCategory[],
   ) => {
     let corrected = false;
 
@@ -237,7 +239,7 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
       if (!selectedOptionId) return;
 
       const selectedOption = category.options.find(
-        (opt) => opt.id === selectedOptionId
+        (opt) => opt.id === selectedOptionId,
       );
       if (!selectedOption) return;
 
@@ -247,13 +249,13 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
 
           const otherCategory = categories.find((c) => c.id === otherId);
           const otherOption = otherCategory?.options.find(
-            (opt) => opt.id === otherOptionId
+            (opt) => opt.id === otherOptionId,
           );
 
           if (!otherOption) return false;
 
           return areIncompatible(selectedOption, otherOption);
-        }
+        },
       );
 
       if (conflict) {
@@ -279,11 +281,10 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
   ------------------------------------------------------- */
 
   const onAddCategory = async (
-    category: ConfigCategory
+    category: ConfigCategory,
   ): Promise<ConfigCategory | null> => {
     try {
       const response = await categoryService.create({
-        
         configuratorId: category.configuratorId,
         name: category.name,
         categoryType: category.categoryType,
@@ -323,7 +324,7 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
     try {
       const response = await categoryService.update({
         id: category.id,
-        
+
         name: category.name,
         categoryType: category.categoryType,
         description: category.description,
@@ -355,11 +356,10 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
 
   const onAddOption = async (
     categoryId: string,
-    option: ConfigOption
+    option: ConfigOption,
   ): Promise<{ success: boolean; isLimitError?: boolean }> => {
     try {
       const response = await optionService.create({
-        
         categoryId,
         label: option.label,
         price: option.price,
@@ -380,7 +380,7 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
         const updatedCategories = state.categories.map((cat) =>
           cat.id === categoryId
             ? { ...cat, options: [...cat.options, response.data] }
-            : cat
+            : cat,
         );
 
         validateAndAdjustSelections(state.selectedConfig, updatedCategories);
@@ -417,7 +417,7 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
     try {
       const response = await optionService.update({
         id: option.id,
-        
+
         label: option.label,
         price: option.price,
         description: option.description,
@@ -438,10 +438,10 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
             ? {
                 ...cat,
                 options: cat.options.map((o) =>
-                  o.id === option.id ? option : o
+                  o.id === option.id ? option : o,
                 ),
               }
-            : cat
+            : cat,
         );
 
         validateAndAdjustSelections(state.selectedConfig, updatedCategories);

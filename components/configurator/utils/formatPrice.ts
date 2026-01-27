@@ -1,6 +1,11 @@
 /**
  * Centralized price formatting utility
- * Ensures consistent price display across the application
+ * Ensures consistent, locale-aware price display across the application
+ *
+ * Key features:
+ * - Automatic currency symbol placement based on locale (USD: $1,234.56 | EUR: 1.234,56 €)
+ * - Correct thousand and decimal separators per locale
+ * - Handles edge cases like string inputs, leading zeros, and null values
  */
 
 export interface PriceFormatOptions {
@@ -13,11 +18,16 @@ export interface PriceFormatOptions {
 
 /**
  * Format a price value with proper locale-aware formatting
- * Handles edge cases like string inputs, leading zeros, and null values
+ * Uses Intl.NumberFormat for automatic currency symbol placement and separators
  *
  * @param value - The price value (number, string, or Decimal)
  * @param options - Formatting options
- * @returns Formatted price string (e.g., "$700.00")
+ * @returns Formatted price string with locale-appropriate formatting
+ *
+ * Examples:
+ * - formatPrice(1234.56, { currencyCode: 'USD', locale: 'en-US' }) → "$1,234.56"
+ * - formatPrice(1234.56, { currencyCode: 'EUR', locale: 'de-DE' }) → "1.234,56 €"
+ * - formatPrice(1234.56, { currencyCode: 'EUR', locale: 'fr-FR' }) → "1 234,56 €"
  */
 export function formatPrice(
   value: number | string | null | undefined,
@@ -25,7 +35,6 @@ export function formatPrice(
 ): string {
   const {
     currencyCode = "USD",
-    currencySymbol = "$",
     locale = "en-US",
     minimumFractionDigits = 2,
     maximumFractionDigits = 2,
@@ -33,7 +42,13 @@ export function formatPrice(
 
   // Handle null/undefined
   if (value === null || value === undefined) {
-    return `${currencySymbol}0.00`;
+    // Use Intl.NumberFormat even for zero to maintain consistency
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits,
+      maximumFractionDigits,
+    }).format(0);
   }
 
   // Parse value to ensure it's a proper number
@@ -57,18 +72,23 @@ export function formatPrice(
     numericValue = 0;
   }
 
-  // Format using locale-specific formatting
-  const formatted = numericValue.toLocaleString(locale, {
+  // Use Intl.NumberFormat with currency style for locale-aware formatting
+  // This automatically:
+  // 1. Places currency symbol in the correct position for the locale
+  // 2. Uses correct thousand separators (comma for en-US, dot for de-DE, space for fr-FR)
+  // 3. Uses correct decimal separators (dot for en-US, comma for de-DE/fr-FR)
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currencyCode,
     minimumFractionDigits,
     maximumFractionDigits,
-  });
-
-  return `${currencySymbol}${formatted}`;
+  }).format(numericValue);
 }
 
 /**
  * Parse a price string to a number
- * Removes currency symbols and formatting
+ * Removes currency symbols and locale-specific formatting
+ * Handles both US format (1,234.56) and European format (1.234,56)
  *
  * @param priceString - Formatted price string
  * @returns Numeric value
@@ -76,8 +96,22 @@ export function formatPrice(
 export function parsePrice(priceString: string): number {
   if (!priceString) return 0;
 
-  // Remove currency symbols, commas, and spaces
-  const cleaned = priceString.replace(/[$€£¥₹,\s]/g, "");
+  // Remove currency symbols and whitespace
+  let cleaned = priceString.replace(/[$€£¥₹\s]/g, "");
+
+  // Detect format: if there's a comma after the last dot, it's European (1.234,56)
+  // Otherwise, it's US format (1,234.56)
+  const lastDot = cleaned.lastIndexOf(".");
+  const lastComma = cleaned.lastIndexOf(",");
+
+  if (lastComma > lastDot) {
+    // European format: dot is thousand separator, comma is decimal
+    cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+  } else {
+    // US format: comma is thousand separator, dot is decimal
+    cleaned = cleaned.replace(/,/g, "");
+  }
+
   const value = parseFloat(cleaned);
 
   return isNaN(value) ? 0 : value;

@@ -80,9 +80,10 @@ export function RequestQuoteDialog({
       doc.setFontSize(10);
       const quantity = item.quantity || 1;
       const itemTotal = item.price * quantity;
-      const itemText = quantity > 1 
-        ? `${index + 1}. ${item.label} (x${quantity}) - ${formatPrice(item.price)} each = ${formatPrice(itemTotal)}`
-        : `${index + 1}. ${item.label} - ${formatPrice(item.price)}`;
+      const itemText =
+        quantity > 1
+          ? `${index + 1}. ${item.label} (x${quantity}) - ${formatPrice(item.price)} each = ${formatPrice(itemTotal)}`
+          : `${index + 1}. ${item.label} - ${formatPrice(item.price)}`;
       doc.text(itemText, 25, yPos);
       yPos += 7;
     });
@@ -172,12 +173,16 @@ export function RequestQuoteDialog({
     };
 
     try {
-      const resp = await quoteService.create(quotePayload, publicKey, isAdminMode);
+      const resp = await quoteService.create(
+        quotePayload,
+        publicKey,
+        isAdminMode,
+      );
 
       if (resp?.success) {
         console.log(
           "Quote Request Payload (saved):",
-          resp.data ?? quotePayload
+          resp.data ?? quotePayload,
         );
 
         toast({

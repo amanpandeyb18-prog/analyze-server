@@ -16,7 +16,7 @@ export const CURRENCIES: Currency[] = [
     locale: "en-US",
     format: (amount: number | string) =>
       formatPrice(amount, {
-        currencySymbol: "$",
+        currencyCode: "USD",
         locale: "en-US",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -29,7 +29,7 @@ export const CURRENCIES: Currency[] = [
     locale: "de-DE",
     format: (amount: number | string) =>
       formatPrice(amount, {
-        currencySymbol: "€",
+        currencyCode: "EUR",
         locale: "de-DE",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -42,7 +42,7 @@ export const CURRENCIES: Currency[] = [
     locale: "en-GB",
     format: (amount: number | string) =>
       formatPrice(amount, {
-        currencySymbol: "£",
+        currencyCode: "GBP",
         locale: "en-GB",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -55,7 +55,7 @@ export const CURRENCIES: Currency[] = [
     locale: "en-IN",
     format: (amount: number | string) =>
       formatPrice(amount, {
-        currencySymbol: "₹",
+        currencyCode: "INR",
         locale: "en-IN",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -68,7 +68,7 @@ export const CURRENCIES: Currency[] = [
     locale: "ja-JP",
     format: (amount: number | string) =>
       formatPrice(amount, {
-        currencySymbol: "¥",
+        currencyCode: "JPY",
         locale: "ja-JP",
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
@@ -81,7 +81,7 @@ export const CURRENCIES: Currency[] = [
     locale: "en-CA",
     format: (amount: number | string) =>
       formatPrice(amount, {
-        currencySymbol: "C$",
+        currencyCode: "CAD",
         locale: "en-CA",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -94,7 +94,7 @@ export const CURRENCIES: Currency[] = [
     locale: "en-AU",
     format: (amount: number | string) =>
       formatPrice(amount, {
-        currencySymbol: "A$",
+        currencyCode: "AUD",
         locale: "en-AU",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,

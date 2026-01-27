@@ -33,7 +33,7 @@ export function OptionFormBasic({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="option-price">Price ($) *</Label>
+        <Label htmlFor="option-price">Price *</Label>
         <Input
           id="option-price"
           type="number"
@@ -45,7 +45,7 @@ export function OptionFormBasic({
           placeholder="0"
         />
         <p className="text-xs text-muted-foreground">
-          Set to 0 for auto-selection by default
+          Price will be formatted according to configurator currency settings
         </p>
       </div>
 
