@@ -34,6 +34,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { QuantityControls } from "./QuantityControls";
 
 interface ConfigurationPanelProps {
   categories: ConfigCategory[];
@@ -382,53 +383,14 @@ export const ConfigurationPanel = forwardRef<
 
                                 {/* Quantity Controls - Show only for selected options */}
                                 {isSelected && (
-                                  <div className="mt-3 pt-3 border-t border-primary/20">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-sm font-medium text-foreground">
-                                        Quantity:
-                                      </span>
-                                      <div className="flex items-center gap-2">
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            const currentQty = selectedQuantities[category.id] || 1;
-                                            if (currentQty > 1) {
-                                              onQuantityChange(category.id, currentQty - 1);
-                                            }
-                                          }}
-                                          data-testid={`decrement-quantity-${category.id}`}
-                                          className="h-7 w-7 rounded-md border-2 border-primary bg-background hover:bg-accent flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                          disabled={(selectedQuantities[category.id] || 1) <= 1}
-                                          title="Decrease quantity"
-                                        >
-                                          <Minus className="h-3.5 w-3.5 text-primary" />
-                                        </button>
-                                        <span 
-                                          className="text-base font-semibold text-foreground min-w-[2rem] text-center"
-                                          data-testid={`quantity-display-${category.id}`}
-                                        >
-                                          {selectedQuantities[category.id] || 1}
-                                        </span>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            const currentQty = selectedQuantities[category.id] || 1;
-                                            onQuantityChange(category.id, currentQty + 1);
-                                          }}
-                                          data-testid={`increment-quantity-${category.id}`}
-                                          className="h-7 w-7 rounded-md border-2 border-primary bg-background hover:bg-accent flex items-center justify-center transition-colors"
-                                          title="Increase quantity"
-                                        >
-                                          <Plus className="h-3.5 w-3.5 text-primary" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                    {option.price > 0 && (
-                                      <div className="mt-2 text-xs text-muted-foreground text-right">
-                                        Subtotal: {formatPrice(option.price * (selectedQuantities[category.id] || 1))}
-                                      </div>
-                                    )}
-                                  </div>
+                                  <QuantityControls
+                                    categoryId={category.id}
+                                    quantity={
+                                      selectedQuantities[category.id] || 1
+                                    }
+                                    onQuantityChange={onQuantityChange}
+                                    price={option?.price}
+                                  />
                                 )}
 
                                 {/* Display attribute values from category template */}
