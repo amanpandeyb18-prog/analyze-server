@@ -1,10 +1,11 @@
 // Pricing calculation utilities
 import { Decimal } from '@prisma/client/runtime/library';
 
-export function calculateTotal(items: { price: number | Decimal }[]): number {
+export function calculateTotal(items: { price: number | Decimal; quantity?: number }[]): number {
   return items.reduce((total, item) => {
     const price = typeof item.price === 'number' ? item.price : parseFloat(item.price.toString());
-    return total + price;
+    const quantity = item.quantity || 1;
+    return total + (price * quantity);
   }, 0);
 }
 
@@ -33,7 +34,7 @@ export interface PriceBreakdown {
 }
 
 export function calculatePriceBreakdown(
-  items: { price: number | Decimal }[],
+  items: { price: number | Decimal; quantity?: number }[],
   taxRate: number = 0
 ): PriceBreakdown {
   const subtotal = calculateTotal(items);

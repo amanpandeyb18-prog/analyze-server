@@ -485,16 +485,21 @@ export default function ConfiguratorApp({
                 .map((cat) => {
                   const optId = state.selectedConfig[cat.id];
                   const opt = cat.options.find((o) => o.id === optId);
+                  const quantity = state.selectedQuantities[cat.id] || 1;
                   return opt
                     ? {
                         sku: opt.sku || opt.id,
                         label: opt.label,
                         price: opt.price,
+                        quantity: quantity,
+                        categoryId: cat.id,
+                        categoryName: cat.name,
                       }
                     : null;
                 })
                 .filter(Boolean) as any[],
             }}
+            selectedQuantities={state.selectedQuantities}
           />
 
           <SettingsDialog
@@ -518,6 +523,7 @@ export default function ConfiguratorApp({
             onOpenChange={setExportDialogOpen}
             categories={state.categories}
             selectedConfig={state.selectedConfig}
+            selectedQuantities={state.selectedQuantities}
           />
 
           <AdminDialog

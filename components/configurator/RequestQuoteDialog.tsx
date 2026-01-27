@@ -17,6 +17,7 @@ import jsPDF from "jspdf";
 import { useCurrency } from "@/components/configurator/contexts/CurrencyContext";
 import { quoteService } from "@/components/configurator/services/quoteService";
 import { getErrorMessage } from "@/components/configurator/lib/api-client";
+import { SelectedQuantities } from "@/components/configurator/types/configurator";
 
 interface RequestQuoteDialogProps {
   open: boolean;
@@ -32,8 +33,12 @@ interface RequestQuoteDialogProps {
       sku: string;
       label: string;
       price: number;
+      quantity?: number;
+      categoryId?: string;
+      categoryName?: string;
     }[];
   };
+  selectedQuantities?: SelectedQuantities;
 }
 
 export function RequestQuoteDialog({
@@ -44,6 +49,7 @@ export function RequestQuoteDialog({
   isAdminMode = false,
   categories = [],
   selectedConfig = {},
+  selectedQuantities = {},
 }: RequestQuoteDialogProps) {
   const { formatPrice } = useCurrency();
   const [formData, setFormData] = useState({
@@ -69,14 +75,15 @@ export function RequestQuoteDialog({
     doc.text("Selected Configuration:", 20, yPos);
     yPos += 10;
 
-    // List all items
+    // List all items with quantities
     selectedConfig?.items?.forEach((item, index) => {
       doc.setFontSize(10);
-      doc.text(
-        `${index + 1}. ${item.label} - ${formatPrice(item.price)}`,
-        25,
-        yPos
-      );
+      const quantity = item.quantity || 1;
+      const itemTotal = item.price * quantity;
+      const itemText = quantity > 1 
+        ? `${index + 1}. ${item.label} (x${quantity}) - ${formatPrice(item.price)} each = ${formatPrice(itemTotal)}`
+        : `${index + 1}. ${item.label} - ${formatPrice(item.price)}`;
+      doc.text(itemText, 25, yPos);
       yPos += 7;
     });
 
@@ -144,7 +151,7 @@ export function RequestQuoteDialog({
       return;
     }
 
-    // Build the payload in your requested format
+    // Build the payload with quantities included
     const quotePayload = {
       configuratorId:
         selectedConfig?.configuratorId || "default_configurator_id",
@@ -155,6 +162,7 @@ export function RequestQuoteDialog({
       totalPrice: totalPrice,
       configuration: {
         items: selectedConfig?.items || [],
+        quantities: selectedQuantities,
       },
       metadata: {
         company: formData.company || "",

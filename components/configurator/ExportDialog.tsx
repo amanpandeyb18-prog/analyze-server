@@ -10,6 +10,7 @@ import {
 import {
   ConfigCategory,
   SelectedConfig,
+  SelectedQuantities,
 } from "@/components/configurator/types/configurator";
 import { useCurrency } from "@/components/configurator/contexts/CurrencyContext";
 import jsPDF from "jspdf";
@@ -20,6 +21,7 @@ interface ExportDialogProps {
   onOpenChange: (open: boolean) => void;
   categories: ConfigCategory[];
   selectedConfig: SelectedConfig;
+  selectedQuantities?: SelectedQuantities;
 }
 
 export function ExportDialog({
@@ -27,6 +29,7 @@ export function ExportDialog({
   onOpenChange,
   categories,
   selectedConfig,
+  selectedQuantities = {},
 }: ExportDialogProps) {
   const { formatPrice } = useCurrency();
   const calculateTotal = () => {
@@ -35,7 +38,8 @@ export function ExportDialog({
       const selectedOptionId = selectedConfig[category.id];
       const option = category.options?.find((o) => o.id === selectedOptionId);
       if (option) {
-        total += Number(option.price);
+        const quantity = selectedQuantities[category.id] || 1;
+        total += Number(option.price) * quantity;
       }
     });
     return total;
@@ -87,6 +91,9 @@ export function ExportDialog({
 
         if (!option) return;
 
+        const quantity = selectedQuantities[category.id] || 1;
+        const itemTotal = Number(option.price) * quantity;
+
         // Check if we need a new page
         if (yPos > pageHeight - 40) {
           doc.addPage();
@@ -100,14 +107,17 @@ export function ExportDialog({
         doc.text(category.name.toUpperCase(), margin, yPos);
         yPos += 7;
 
-        // Option name
+        // Option name with quantity
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(0, 0, 0);
-        doc.text(option.label, margin + 5, yPos);
+        const optionText = quantity > 1 ? `${option.label} (x${quantity})` : option.label;
+        doc.text(optionText, margin + 5, yPos);
 
-        // Price (right aligned)
-        const priceText = formatPrice(option.price);
+        // Price (right aligned) - show item total if quantity > 1
+        const priceText = quantity > 1 
+          ? `${formatPrice(option.price)} each = ${formatPrice(itemTotal)}`
+          : formatPrice(option.price);
         const priceWidth = doc.getTextWidth(priceText);
         doc.text(priceText, pageWidth - margin - priceWidth, yPos);
         yPos += 7;
@@ -212,6 +222,9 @@ export function ExportDialog({
 
             if (!option) return null;
 
+            const quantity = selectedQuantities[category.id] || 1;
+            const itemTotal = Number(option.price) * quantity;
+
             return (
               <Card
                 key={category.id}
@@ -222,11 +235,17 @@ export function ExportDialog({
                     {category.name}
                   </span>
                   <span className="text-sm font-semibold text-foreground">
-                    {formatPrice(option.price)}
+                    {quantity > 1 ? (
+                      <span>
+                        {formatPrice(option.price)} x {quantity} = {formatPrice(itemTotal)}
+                      </span>
+                    ) : (
+                      formatPrice(option.price)
+                    )}
                   </span>
                 </div>
                 <h4 className="font-semibold text-foreground mb-1">
-                  {option.label}
+                  {option.label} {quantity > 1 && <span className="text-primary">(x{quantity})</span>}
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   {option.description}
