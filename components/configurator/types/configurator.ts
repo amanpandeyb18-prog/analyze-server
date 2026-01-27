@@ -91,8 +91,13 @@ export interface SelectedConfig {
   [categoryId: string]: string; // categoryId -> optionId
 }
 
+export interface SelectedQuantities {
+  [categoryId: string]: number; // categoryId -> quantity
+}
+
 export interface ConfigState {
   categories: ConfigCategory[];
   selectedConfig: SelectedConfig;
+  selectedQuantities: SelectedQuantities;
   isAdminMode: boolean;
 }

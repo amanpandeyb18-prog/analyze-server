@@ -3,20 +3,25 @@ import { Button } from "@/components/ui/button";
 import {
   ConfigCategory,
   SelectedConfig,
+  SelectedQuantities,
 } from "@/components/configurator/types/configurator";
 import { useCurrency } from "@/components/configurator/contexts/CurrencyContext";
-import { X } from "lucide-react";
+import { X, Plus, Minus } from "lucide-react";
 
 interface SummaryPanelProps {
   categories: ConfigCategory[];
   selectedConfig: SelectedConfig;
+  selectedQuantities: SelectedQuantities;
   onRemoveOption?: (categoryId: string) => void;
+  onQuantityChange: (categoryId: string, quantity: number) => void;
 }
 
 export function SummaryPanel({
   categories,
   selectedConfig,
+  selectedQuantities,
   onRemoveOption,
+  onQuantityChange,
 }: SummaryPanelProps) {
   const { formatPrice } = useCurrency();
 
@@ -78,6 +83,55 @@ export function SummaryPanel({
                   <p className="text-sm text-muted-foreground">
                     {option.description}
                   </p>
+
+                  {/* Quantity Controls */}
+                  <div className="mt-3 pt-3 border-t border-primary/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">
+                        Quantity:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const currentQty = selectedQuantities[category.id] || 1;
+                            if (currentQty > 1) {
+                              onQuantityChange(category.id, currentQty - 1);
+                            }
+                          }}
+                          data-testid={`summary-decrement-quantity-${category.id}`}
+                          className="h-7 w-7 rounded-md border-2 border-primary bg-background hover:bg-accent flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={(selectedQuantities[category.id] || 1) <= 1}
+                          title="Decrease quantity"
+                        >
+                          <Minus className="h-3.5 w-3.5 text-primary" />
+                        </button>
+                        <span 
+                          className="text-base font-semibold text-foreground min-w-[2rem] text-center"
+                          data-testid={`summary-quantity-display-${category.id}`}
+                        >
+                          {selectedQuantities[category.id] || 1}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const currentQty = selectedQuantities[category.id] || 1;
+                            onQuantityChange(category.id, currentQty + 1);
+                          }}
+                          data-testid={`summary-increment-quantity-${category.id}`}
+                          className="h-7 w-7 rounded-md border-2 border-primary bg-background hover:bg-accent flex items-center justify-center transition-colors"
+                          title="Increase quantity"
+                        >
+                          <Plus className="h-3.5 w-3.5 text-primary" />
+                        </button>
+                      </div>
+                    </div>
+                    {option.price > 0 && (
+                      <div className="mt-2 text-sm font-medium text-foreground text-right">
+                        Subtotal: {formatPrice(option.price * (selectedQuantities[category.id] || 1))}
+                      </div>
+                    )}
+                  </div>
 
                   {/* Display attribute values from category template */}
                   {category.attributesTemplate &&

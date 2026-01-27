@@ -14,6 +14,9 @@ import { optionService } from "@/components/configurator/services/optionService"
 ------------------------------------------------------- */
 type Action =
   | { type: "SELECT_OPTION"; categoryId: string; optionId: string }
+  | { type: "SET_QUANTITY"; categoryId: string; quantity: number }
+  | { type: "INCREMENT_QUANTITY"; categoryId: string }
+  | { type: "DECREMENT_QUANTITY"; categoryId: string }
   | { type: "TOGGLE_ADMIN" }
   | { type: "ADD_CATEGORY"; category: ConfigCategory }
   | { type: "UPDATE_CATEGORY"; category: ConfigCategory }
@@ -40,11 +43,50 @@ function normalizeCategory(cat: ConfigCategory): ConfigCategory {
 function configReducer(state: ConfigState, action: Action): ConfigState {
   switch (action.type) {
     case "SELECT_OPTION":
+      // When selecting an option, initialize quantity to 1 if it's a new selection
+      const isNewSelection = state.selectedConfig[action.categoryId] !== action.optionId;
       return {
         ...state,
         selectedConfig: {
           ...state.selectedConfig,
           [action.categoryId]: action.optionId,
+        },
+        selectedQuantities: {
+          ...state.selectedQuantities,
+          // Set quantity to 1 for new selections, keep existing for re-selections
+          [action.categoryId]: isNewSelection ? 1 : (state.selectedQuantities[action.categoryId] || 1),
+        },
+      };
+
+    case "SET_QUANTITY":
+      // Prevent quantity from going below 1
+      const newQuantity = Math.max(1, action.quantity);
+      return {
+        ...state,
+        selectedQuantities: {
+          ...state.selectedQuantities,
+          [action.categoryId]: newQuantity,
+        },
+      };
+
+    case "INCREMENT_QUANTITY":
+      const currentQty = state.selectedQuantities[action.categoryId] || 1;
+      return {
+        ...state,
+        selectedQuantities: {
+          ...state.selectedQuantities,
+          [action.categoryId]: currentQty + 1,
+        },
+      };
+
+    case "DECREMENT_QUANTITY":
+      const currentQtyDec = state.selectedQuantities[action.categoryId] || 1;
+      // Prevent going below 1
+      return {
+        ...state,
+        selectedQuantities: {
+          ...state.selectedQuantities,
+          [action.categoryId]: Math.max(1, currentQtyDec - 1),
         },
       };
 
@@ -156,6 +198,7 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
   const [state, dispatch] = useReducer(configReducer, {
     categories: initialCategories,
     selectedConfig: initialSelectedConfig,
+    selectedQuantities: {},
     isAdminMode: false,
   });
 
@@ -178,7 +221,8 @@ export function useConfiguration(apiCategories: ConfigCategory[]) {
     return state.categories.reduce((total, cat) => {
       const optId = state.selectedConfig[cat.id];
       const opt = cat.options.find((o) => o.id === optId);
-      return total + (Number(opt?.price) || 0);
+      const quantity = state.selectedQuantities[cat.id] || 1;
+      return total + (Number(opt?.price) || 0) * quantity;
     }, 0);
   };
 

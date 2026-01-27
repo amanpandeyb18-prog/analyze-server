@@ -9,20 +9,24 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ConfigCategory, SelectedConfig } from "@/components/configurator/types/configurator";
+import { ConfigCategory, SelectedConfig, SelectedQuantities } from "@/components/configurator/types/configurator";
 import { useCurrency } from "@/components/configurator/contexts/CurrencyContext";
-import { List } from "lucide-react";
+import { List, Plus, Minus } from "lucide-react";
 
 interface SelectedConfigDrawerProps {
   categories: ConfigCategory[];
   selectedConfig: SelectedConfig;
+  selectedQuantities: SelectedQuantities;
   totalPrice: string;
+  onQuantityChange: (categoryId: string, quantity: number) => void;
 }
 
 export function SelectedConfigDrawer({
   categories,
   selectedConfig,
+  selectedQuantities,
   totalPrice,
+  onQuantityChange,
 }: SelectedConfigDrawerProps) {
   const { formatPrice } = useCurrency();
   const hasSelections = Object.values(selectedConfig).some((val) => val !== "");
@@ -90,6 +94,51 @@ export function SelectedConfigDrawer({
                       <p className="font-bold text-lg text-foreground ml-4">
                         {formatPrice(option.price)}
                       </p>
+                    </div>
+
+                    {/* Quantity Controls for Mobile */}
+                    <div className="mt-3 pt-3 border-t border-primary/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">
+                          Quantity:
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => {
+                              const currentQty = selectedQuantities[category.id] || 1;
+                              if (currentQty > 1) {
+                                onQuantityChange(category.id, currentQty - 1);
+                              }
+                            }}
+                            data-testid={`mobile-decrement-quantity-${category.id}`}
+                            className="h-9 w-9 rounded-md border-2 border-primary bg-background active:bg-accent flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                            disabled={(selectedQuantities[category.id] || 1) <= 1}
+                          >
+                            <Minus className="h-4 w-4 text-primary" />
+                          </button>
+                          <span 
+                            className="text-lg font-bold text-foreground min-w-[3rem] text-center"
+                            data-testid={`mobile-quantity-display-${category.id}`}
+                          >
+                            {selectedQuantities[category.id] || 1}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const currentQty = selectedQuantities[category.id] || 1;
+                              onQuantityChange(category.id, currentQty + 1);
+                            }}
+                            data-testid={`mobile-increment-quantity-${category.id}`}
+                            className="h-9 w-9 rounded-md border-2 border-primary bg-background active:bg-accent flex items-center justify-center transition-colors touch-manipulation"
+                          >
+                            <Plus className="h-4 w-4 text-primary" />
+                          </button>
+                        </div>
+                      </div>
+                      {option.price > 0 && (
+                        <div className="mt-2 text-sm font-medium text-foreground text-right">
+                          Subtotal: {formatPrice(option.price * (selectedQuantities[category.id] || 1))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );

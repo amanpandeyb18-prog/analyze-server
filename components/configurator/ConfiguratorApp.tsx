@@ -360,7 +360,11 @@ export default function ConfiguratorApp({
                 ref={configPanelRef}
                 categories={state.categories}
                 selectedConfig={state.selectedConfig}
+                selectedQuantities={state.selectedQuantities}
                 onOptionSelect={handleOptionSelect}
+                onQuantityChange={(categoryId, quantity) => {
+                  dispatch({ type: "SET_QUANTITY", categoryId, quantity });
+                }}
                 isAdminMode={adminModeEnabled}
                 onAddCategory={handleAddCategory}
                 onEditCategory={handleEditCategory}
@@ -388,8 +392,12 @@ export default function ConfiguratorApp({
               <SummaryPanel
                 categories={state.categories}
                 selectedConfig={state.selectedConfig}
+                selectedQuantities={state.selectedQuantities}
                 onRemoveOption={(categoryId) => {
                   dispatch({ type: "SELECT_OPTION", categoryId, optionId: "" });
+                }}
+                onQuantityChange={(categoryId, quantity) => {
+                  dispatch({ type: "SET_QUANTITY", categoryId, quantity });
                 }}
               />
             </div>
@@ -404,7 +412,11 @@ export default function ConfiguratorApp({
                 <SelectedConfigDrawer
                   categories={state.categories}
                   selectedConfig={state.selectedConfig}
+                  selectedQuantities={state.selectedQuantities}
                   totalPrice={formatPrice(calculateTotal())}
+                  onQuantityChange={(categoryId, quantity) => {
+                    dispatch({ type: "SET_QUANTITY", categoryId, quantity });
+                  }}
                 />
 
                 <div className="pt-2 space-y-3">
