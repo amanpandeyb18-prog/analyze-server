@@ -298,10 +298,59 @@
   color: hsl(var(--cfg-muted-foreground));
 }
 
-/* Dialog/Modal overlays */
+/* ==========================================================================
+   PORTAL COMPONENTS - ENSURE THEME INHERITANCE
+   ========================================================================== */
+
+/* Dialog/Modal overlays and portals - ensure theme inheritance */
 .configurator-root [data-slot="dialog-overlay"],
 .configurator-root [data-slot="drawer-overlay"] {
   background-color: hsl(0 0% 0% / 0.5);
+}
+
+/* Ensure all portals inside configurator-root inherit theme variables */
+.configurator-root [data-slot="dialog-portal"],
+.configurator-root [data-slot="dialog-content"],
+.configurator-root [data-slot="drawer-portal"],
+.configurator-root [data-slot="drawer-content"],
+.configurator-root [data-radix-popper-content-wrapper],
+[data-radix-popper-content-wrapper]:has(.configurator-root),
+.configurator-root [data-slot="popover-content"],
+.configurator-root [data-slot="select-content"],
+.configurator-root [data-slot="dropdown-content"],
+.configurator-root [data-slot="tooltip-content"] {
+  /* Inherit all configurator CSS variables */
+  --background: var(--cfg-background);
+  --foreground: var(--cfg-foreground);
+  --primary: var(--cfg-primary);
+  --primary-foreground: var(--cfg-primary-foreground);
+  --secondary: var(--cfg-secondary);
+  --secondary-foreground: var(--cfg-secondary-foreground);
+  --accent: var(--cfg-accent);
+  --accent-foreground: var(--cfg-accent-foreground);
+  --muted: var(--cfg-muted);
+  --muted-foreground: var(--cfg-muted-foreground);
+  --card: var(--cfg-card);
+  --card-foreground: var(--cfg-card-foreground);
+  --popover: var(--cfg-popover);
+  --popover-foreground: var(--cfg-popover-foreground);
+  --border: var(--cfg-border);
+  --input: var(--cfg-input);
+  --ring: var(--cfg-ring);
+  --destructive: var(--cfg-destructive);
+  --destructive-foreground: var(--cfg-destructive-foreground);
+  --radius: var(--cfg-radius);
+}
+
+/* Apply configurator theme to all portal children */
+.configurator-root [data-slot="dialog-content"] *,
+.configurator-root [data-slot="drawer-content"] *,
+.configurator-root [data-slot="popover-content"] *,
+.configurator-root [data-slot="select-content"] *,
+.configurator-root [data-slot="dropdown-content"] *,
+.configurator-root [data-slot="tooltip-content"] * {
+  /* Ensure nested elements use configurator colors */
+  border-color: hsl(var(--cfg-border));
 }
 
 /* ==========================================================================

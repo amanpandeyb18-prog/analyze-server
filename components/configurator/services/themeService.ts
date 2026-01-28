@@ -20,13 +20,20 @@ export const themeService = {
 
   /**
    * Save/update theme (uses session auth)
+   * Handles both create and update scenarios
    */
   async saveTheme(theme: Partial<Theme>): Promise<Theme> {
-    const response = await apiClient.put<Theme>("/api/theme/update", theme);
-    if (response.success && response.data) {
-      return response.data;
+    try {
+      const response = await apiClient.put<Theme>("/api/theme/update", theme);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      throw new Error(response.message || "Failed to save theme");
+    } catch (error: any) {
+      console.error("Theme save error:", error);
+      // If update fails, try to handle gracefully
+      throw new Error(error.message || "Failed to save theme");
     }
-    throw new Error("Failed to save theme");
   },
 
   /**

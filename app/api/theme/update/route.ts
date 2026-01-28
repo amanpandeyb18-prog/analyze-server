@@ -14,8 +14,9 @@ export async function PUT(request: NextRequest) {
     // Verify session
     const auth = await verifyAdminSession();
 
-    // If no ID provided, get or create active theme
+    // If no ID provided, use create-or-update logic
     if (!id) {
+      // Try to find existing active theme
       let theme = await prisma.theme.findFirst({
         where: {
           clientId: auth.clientId,
@@ -24,38 +25,55 @@ export async function PUT(request: NextRequest) {
         orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
       });
 
-      if (!theme) {
-        // Create new theme with data
+      if (theme) {
+        // Update existing theme
+        const updated = await ThemeService.update(theme.id, data);
+        return success(updated, "Theme updated successfully");
+      } else {
+        // Create new theme with provided data and defaults
         theme = await prisma.theme.create({
           data: {
             clientId: auth.clientId,
+            ...(DEFAULT_THEME as any),
             ...(data as any),
-            name: data.name || "Custom Theme",
+            name: (data as any)?.name || "Custom Theme",
             isActive: true,
+            isDefault: true,
           },
         });
         return success(theme, "Theme created successfully");
       }
-
-      id = theme.id;
     } else {
-      // Verify theme belongs to client
+      // ID provided - verify and update specific theme
       const theme = await prisma.theme.findUnique({
         where: { id },
         select: { id: true, clientId: true },
       });
 
       if (!theme) {
-        return notFound("Theme not found");
+        // Theme not found - create new one with provided data
+        console.warn(`Theme ${id} not found, creating new theme instead`);
+        const newTheme = await prisma.theme.create({
+          data: {
+            clientId: auth.clientId,
+            ...(DEFAULT_THEME as any),
+            ...(data as any),
+            name: (data as any)?.name || "Custom Theme",
+            isActive: true,
+            isDefault: true,
+          },
+        });
+        return success(newTheme, "Theme created successfully");
       }
 
       if (theme.clientId !== auth.clientId) {
         return unauthorized("You don't own this theme");
       }
-    }
 
-    const updated = await ThemeService.update(id, data);
-    return success(updated, "Theme updated successfully");
+      // Update existing theme
+      const updated = await ThemeService.update(id, data);
+      return success(updated, "Theme updated successfully");
+    }
   } catch (error: any) {
     console.error("Theme update error:", error);
     if (

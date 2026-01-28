@@ -50,12 +50,30 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  container,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  container?: HTMLElement | null;
 }) {
+  // Auto-detect .configurator-root container for theme inheritance
+  const [portalContainer, setPortalContainer] =
+    React.useState<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (container !== undefined) {
+      setPortalContainer(container);
+    } else {
+      // Try to find .configurator-root in the DOM
+      const configuratorRoot = document.querySelector(
+        ".configurator-root",
+      ) as HTMLElement;
+      setPortalContainer(configuratorRoot || null);
+    }
+  }, [container]);
+
   return (
-    <DialogPortal data-slot="dialog-portal">
+    <DialogPortal data-slot="dialog-portal" container={portalContainer}>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
