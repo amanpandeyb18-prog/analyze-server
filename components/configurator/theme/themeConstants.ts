@@ -140,7 +140,6 @@ export function generateThemeCSSVariables(
   // Convert all colors to HSL for consistency
   const primary = getHSLFromColor(theme.primaryColor);
   const secondary = getHSLFromColor(theme.secondaryColor);
-  const accent = getHSLFromColor(theme.accentColor);
   const background = getHSLFromColor(theme.backgroundColor);
   const surface = getHSLFromColor(theme.surfaceColor);
   const text = getHSLFromColor(theme.textColor);
@@ -155,6 +154,12 @@ export function generateThemeCSSVariables(
     theme.customTextColor,
   );
 
+  // Generate accent as a LIGHT TINT of primary color for selection backgrounds
+  // This ensures readable text (dark text on light background)
+  // Using high lightness (95-97%) and reduced saturation for a subtle tint
+  const accentLightness = 95; // Very light background
+  const accentSaturation = Math.min(primary.s, 40); // Capped saturation for subtle effect
+
   // Generate complete theme variable set with --cfg- prefix
   return {
     // Primary colors (for buttons, links, etc.)
@@ -165,9 +170,10 @@ export function generateThemeCSSVariables(
     "--cfg-secondary": `${secondary.h} ${secondary.s}% ${secondary.l}%`,
     "--cfg-secondary-foreground": `${secondary.h} ${secondary.s}% ${secondary.l > 50 ? 10 : 98}%`,
 
-    // Accent colors (for hover states, highlights)
-    "--cfg-accent": `${accent.h} ${accent.s}% ${accent.l}%`,
-    "--cfg-accent-foreground": `${accent.h} ${accent.s}% ${accent.l > 50 ? 10 : 98}%`,
+    // Accent colors - LIGHT TINT of primary for selection backgrounds
+    // This is the key fix: bg-accent should be a translucent/light version of primary
+    "--cfg-accent": `${primary.h} ${accentSaturation}% ${accentLightness}%`,
+    "--cfg-accent-foreground": `${primary.h} ${primary.s}% ${Math.max(primary.l - 20, 25)}%`,
 
     // Muted colors (for disabled states, subtle backgrounds)
     "--cfg-muted": `${primary.h} ${Math.max(primary.s - 70, 10)}% 95%`,
