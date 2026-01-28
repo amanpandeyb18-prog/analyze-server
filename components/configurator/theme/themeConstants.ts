@@ -132,23 +132,71 @@ export function calculateTextColor(
 
 /**
  * Generate CSS custom properties object for theme
+ * Uses --cfg-* prefix to avoid conflicts with Next.js app theme
  */
 export function generateThemeCSSVariables(
   theme: Theme,
 ): Record<string, string> {
-  const hsl = getHSLFromColor(theme.primaryColor);
-  const primaryHSL = `${hsl.h} ${hsl.s}% ${hsl.l}%`;
+  // Convert all colors to HSL for consistency
+  const primary = getHSLFromColor(theme.primaryColor);
+  const secondary = getHSLFromColor(theme.secondaryColor);
+  const accent = getHSLFromColor(theme.accentColor);
+  const background = getHSLFromColor(theme.backgroundColor);
+  const surface = getHSLFromColor(theme.surfaceColor);
+  const text = getHSLFromColor(theme.textColor);
+
+  // Calculate primary HSL string
+  const primaryHSL = `${primary.h} ${primary.s}% ${primary.l}%`;
+
+  // Calculate appropriate foreground color
   const foregroundHSL = calculateTextColor(
     theme.primaryColor,
     theme.textColorMode,
     theme.customTextColor,
   );
 
+  // Generate complete theme variable set with --cfg- prefix
   return {
-    "--primary": primaryHSL,
-    "--primary-foreground": foregroundHSL,
-    "--ring": primaryHSL,
-    "--accent": `${hsl.h} ${Math.min(hsl.s, 100)}% 97%`,
-    "--accent-foreground": primaryHSL,
+    // Primary colors (for buttons, links, etc.)
+    "--cfg-primary": primaryHSL,
+    "--cfg-primary-foreground": foregroundHSL,
+
+    // Secondary colors
+    "--cfg-secondary": `${secondary.h} ${secondary.s}% ${secondary.l}%`,
+    "--cfg-secondary-foreground": `${secondary.h} ${secondary.s}% ${secondary.l > 50 ? 10 : 98}%`,
+
+    // Accent colors (for hover states, highlights)
+    "--cfg-accent": `${accent.h} ${accent.s}% ${accent.l}%`,
+    "--cfg-accent-foreground": `${accent.h} ${accent.s}% ${accent.l > 50 ? 10 : 98}%`,
+
+    // Muted colors (for disabled states, subtle backgrounds)
+    "--cfg-muted": `${primary.h} ${Math.max(primary.s - 70, 10)}% 95%`,
+    "--cfg-muted-foreground": `${primary.h} ${Math.max(primary.s - 80, 10)}% 45%`,
+
+    // Background and foreground
+    "--cfg-background": `${background.h} ${background.s}% ${background.l}%`,
+    "--cfg-foreground": `${text.h} ${text.s}% ${text.l}%`,
+
+    // Card colors (for panels, cards)
+    "--cfg-card": `${surface.h} ${surface.s}% ${surface.l}%`,
+    "--cfg-card-foreground": `${text.h} ${text.s}% ${text.l}%`,
+
+    // Popover colors (for dropdowns, tooltips)
+    "--cfg-popover": `${surface.h} ${surface.s}% ${surface.l}%`,
+    "--cfg-popover-foreground": `${text.h} ${text.s}% ${text.l}%`,
+
+    // Border and input colors
+    "--cfg-border": `${primary.h} ${Math.max(primary.s - 70, 10)}% 90%`,
+    "--cfg-input": `${primary.h} ${Math.max(primary.s - 70, 10)}% 90%`,
+
+    // Ring color (for focus states)
+    "--cfg-ring": primaryHSL,
+
+    // Destructive colors (for errors, delete actions)
+    "--cfg-destructive": "0 84% 60%",
+    "--cfg-destructive-foreground": "0 0% 98%",
+
+    // Layout variables
+    "--cfg-radius": theme.borderRadius || "0.5rem",
   };
 }

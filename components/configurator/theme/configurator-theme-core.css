@@ -1,0 +1,381 @@
+/**
+ * Configurator Theme Core Styles
+ * Complete isolation from Next.js app theme
+ * 
+ * Architecture:
+ * - Single .configurator-root boundary
+ * - Prefixed CSS variables (--cfg-*)
+ * - Scoped Tailwind utility overrides
+ * - Independent from next-themes
+ */
+
+/* ==========================================================================
+   CONFIGURATOR ROOT BOUNDARY
+   ========================================================================== */
+
+.configurator-root {
+  /* Create a clean isolation boundary WITHOUT destroying everything */
+  position: relative;
+  isolation: isolate;
+
+  /* Base font system */
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Reset some inherited properties */
+  line-height: 1.5;
+  font-size: 16px;
+
+  /* Full viewport */
+  min-height: 100vh;
+  width: 100%;
+
+  /* Default configurator colors (blue theme fallback) */
+  --cfg-primary: 217 91% 60%;
+  --cfg-primary-foreground: 0 0% 98%;
+  --cfg-secondary: 217 20% 95%;
+  --cfg-secondary-foreground: 217 30% 20%;
+  --cfg-accent: 217 91% 97%;
+  --cfg-accent-foreground: 217 91% 60%;
+  --cfg-muted: 217 20% 95%;
+  --cfg-muted-foreground: 217 10% 45%;
+  --cfg-background: 0 0% 100%;
+  --cfg-foreground: 0 0% 10%;
+  --cfg-card: 0 0% 100%;
+  --cfg-card-foreground: 0 0% 10%;
+  --cfg-popover: 0 0% 100%;
+  --cfg-popover-foreground: 0 0% 10%;
+  --cfg-border: 217 20% 90%;
+  --cfg-input: 217 20% 90%;
+  --cfg-ring: 217 91% 60%;
+  --cfg-destructive: 0 84% 60%;
+  --cfg-destructive-foreground: 0 0% 98%;
+
+  /* Layout variables */
+  --cfg-radius: 0.5rem;
+  --cfg-radius-sm: calc(var(--cfg-radius) - 2px);
+  --cfg-radius-md: var(--cfg-radius);
+  --cfg-radius-lg: calc(var(--cfg-radius) + 2px);
+  --cfg-radius-xl: calc(var(--cfg-radius) + 4px);
+
+  /* Apply base colors */
+  background-color: hsl(var(--cfg-background));
+  color: hsl(var(--cfg-foreground));
+}
+
+/* Box model reset for all configurator elements */
+.configurator-root *,
+.configurator-root *::before,
+.configurator-root *::after {
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   TAILWIND UTILITY OVERRIDES FOR CONFIGURATOR SCOPE
+   ========================================================================== */
+
+/* Background Colors */
+.configurator-root .bg-background {
+  background-color: hsl(var(--cfg-background)) !important;
+}
+.configurator-root .bg-foreground {
+  background-color: hsl(var(--cfg-foreground)) !important;
+}
+.configurator-root .bg-primary {
+  background-color: hsl(var(--cfg-primary)) !important;
+}
+.configurator-root .bg-primary\/90 {
+  background-color: hsl(var(--cfg-primary) / 0.9) !important;
+}
+.configurator-root .bg-secondary {
+  background-color: hsl(var(--cfg-secondary)) !important;
+}
+.configurator-root .bg-secondary\/80 {
+  background-color: hsl(var(--cfg-secondary) / 0.8) !important;
+}
+.configurator-root .bg-accent {
+  background-color: hsl(var(--cfg-accent)) !important;
+}
+.configurator-root .bg-muted {
+  background-color: hsl(var(--cfg-muted)) !important;
+}
+.configurator-root .bg-card {
+  background-color: hsl(var(--cfg-card)) !important;
+}
+.configurator-root .bg-popover {
+  background-color: hsl(var(--cfg-popover)) !important;
+}
+.configurator-root .bg-destructive {
+  background-color: hsl(var(--cfg-destructive)) !important;
+}
+.configurator-root .bg-destructive\/90 {
+  background-color: hsl(var(--cfg-destructive) / 0.9) !important;
+}
+
+/* Text Colors */
+.configurator-root .text-background {
+  color: hsl(var(--cfg-background)) !important;
+}
+.configurator-root .text-foreground {
+  color: hsl(var(--cfg-foreground)) !important;
+}
+.configurator-root .text-primary {
+  color: hsl(var(--cfg-primary)) !important;
+}
+.configurator-root .text-primary-foreground {
+  color: hsl(var(--cfg-primary-foreground)) !important;
+}
+.configurator-root .text-secondary {
+  color: hsl(var(--cfg-secondary)) !important;
+}
+.configurator-root .text-secondary-foreground {
+  color: hsl(var(--cfg-secondary-foreground)) !important;
+}
+.configurator-root .text-accent {
+  color: hsl(var(--cfg-accent)) !important;
+}
+.configurator-root .text-accent-foreground {
+  color: hsl(var(--cfg-accent-foreground)) !important;
+}
+.configurator-root .text-muted {
+  color: hsl(var(--cfg-muted)) !important;
+}
+.configurator-root .text-muted-foreground {
+  color: hsl(var(--cfg-muted-foreground)) !important;
+}
+.configurator-root .text-card {
+  color: hsl(var(--cfg-card)) !important;
+}
+.configurator-root .text-card-foreground {
+  color: hsl(var(--cfg-card-foreground)) !important;
+}
+.configurator-root .text-popover-foreground {
+  color: hsl(var(--cfg-popover-foreground)) !important;
+}
+.configurator-root .text-destructive {
+  color: hsl(var(--cfg-destructive)) !important;
+}
+.configurator-root .text-destructive-foreground {
+  color: hsl(var(--cfg-destructive-foreground)) !important;
+}
+
+/* Border Colors */
+.configurator-root .border {
+  border-width: 1px;
+}
+.configurator-root .border-border {
+  border-color: hsl(var(--cfg-border)) !important;
+}
+.configurator-root .border-input {
+  border-color: hsl(var(--cfg-input)) !important;
+}
+.configurator-root .border-primary {
+  border-color: hsl(var(--cfg-primary)) !important;
+}
+.configurator-root .border-secondary {
+  border-color: hsl(var(--cfg-secondary)) !important;
+}
+.configurator-root .border-accent {
+  border-color: hsl(var(--cfg-accent)) !important;
+}
+.configurator-root .border-muted {
+  border-color: hsl(var(--cfg-muted)) !important;
+}
+.configurator-root .border-destructive {
+  border-color: hsl(var(--cfg-destructive)) !important;
+}
+.configurator-root .border-b {
+  border-bottom-width: 1px;
+  border-color: hsl(var(--cfg-border));
+}
+.configurator-root .border-t {
+  border-top-width: 1px;
+  border-color: hsl(var(--cfg-border));
+}
+.configurator-root .border-r {
+  border-right-width: 1px;
+  border-color: hsl(var(--cfg-border));
+}
+.configurator-root .border-l {
+  border-left-width: 1px;
+  border-color: hsl(var(--cfg-border));
+}
+
+/* Ring Colors (focus states) */
+.configurator-root .ring {
+  box-shadow: 0 0 0 3px hsl(var(--cfg-ring) / 0.5);
+}
+.configurator-root .ring-ring {
+  box-shadow: 0 0 0 3px hsl(var(--cfg-ring) / 0.5) !important;
+}
+.configurator-root .ring-primary {
+  box-shadow: 0 0 0 3px hsl(var(--cfg-primary) / 0.5) !important;
+}
+.configurator-root .ring-destructive {
+  box-shadow: 0 0 0 3px hsl(var(--cfg-destructive) / 0.5) !important;
+}
+.configurator-root .focus-visible\:ring-ring:focus-visible {
+  box-shadow: 0 0 0 3px hsl(var(--cfg-ring) / 0.5) !important;
+}
+.configurator-root .outline-ring {
+  outline-color: hsl(var(--cfg-ring) / 0.5) !important;
+}
+
+/* Hover States */
+.configurator-root .hover\:bg-primary\/90:hover {
+  background-color: hsl(var(--cfg-primary) / 0.9) !important;
+}
+.configurator-root .hover\:bg-secondary\/80:hover {
+  background-color: hsl(var(--cfg-secondary) / 0.8) !important;
+}
+.configurator-root .hover\:bg-accent:hover {
+  background-color: hsl(var(--cfg-accent)) !important;
+}
+.configurator-root .hover\:bg-muted:hover {
+  background-color: hsl(var(--cfg-muted)) !important;
+}
+.configurator-root .hover\:bg-destructive\/90:hover {
+  background-color: hsl(var(--cfg-destructive) / 0.9) !important;
+}
+.configurator-root .hover\:text-accent-foreground:hover {
+  color: hsl(var(--cfg-accent-foreground)) !important;
+}
+.configurator-root .hover\:text-primary:hover {
+  color: hsl(var(--cfg-primary)) !important;
+}
+
+/* Border Radius */
+.configurator-root .rounded-sm {
+  border-radius: var(--cfg-radius-sm);
+}
+.configurator-root .rounded {
+  border-radius: var(--cfg-radius-sm);
+}
+.configurator-root .rounded-md {
+  border-radius: var(--cfg-radius-md);
+}
+.configurator-root .rounded-lg {
+  border-radius: var(--cfg-radius-lg);
+}
+.configurator-root .rounded-xl {
+  border-radius: var(--cfg-radius-xl);
+}
+.configurator-root .rounded-full {
+  border-radius: 9999px;
+}
+
+/* ==========================================================================
+   COMPONENT-SPECIFIC OVERRIDES
+   ========================================================================== */
+
+/* Ensure buttons use configurator theme */
+.configurator-root button[data-slot="button"] {
+  font-family: inherit;
+}
+
+/* Ensure cards use configurator theme */
+.configurator-root [data-slot="card"] {
+  background-color: hsl(var(--cfg-card));
+  color: hsl(var(--cfg-card-foreground));
+  border-color: hsl(var(--cfg-border));
+}
+
+/* Ensure inputs use configurator theme */
+.configurator-root input,
+.configurator-root textarea,
+.configurator-root select {
+  font-family: inherit;
+  background-color: hsl(var(--cfg-background));
+  color: hsl(var(--cfg-foreground));
+  border-color: hsl(var(--cfg-input));
+}
+
+.configurator-root input::placeholder,
+.configurator-root textarea::placeholder {
+  color: hsl(var(--cfg-muted-foreground));
+}
+
+/* Dialog/Modal overlays */
+.configurator-root [data-slot="dialog-overlay"],
+.configurator-root [data-slot="drawer-overlay"] {
+  background-color: hsl(0 0% 0% / 0.5);
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+
+/* Shadow utilities using configurator colors */
+.configurator-root .shadow-sm {
+  box-shadow: 0 1px 2px 0 hsl(var(--cfg-foreground) / 0.05);
+}
+.configurator-root .shadow {
+  box-shadow:
+    0 1px 3px 0 hsl(var(--cfg-foreground) / 0.1),
+    0 1px 2px -1px hsl(var(--cfg-foreground) / 0.1);
+}
+.configurator-root .shadow-md {
+  box-shadow:
+    0 4px 6px -1px hsl(var(--cfg-foreground) / 0.1),
+    0 2px 4px -2px hsl(var(--cfg-foreground) / 0.1);
+}
+.configurator-root .shadow-lg {
+  box-shadow:
+    0 10px 15px -3px hsl(var(--cfg-foreground) / 0.1),
+    0 4px 6px -4px hsl(var(--cfg-foreground) / 0.1);
+}
+.configurator-root .shadow-xl {
+  box-shadow:
+    0 20px 25px -5px hsl(var(--cfg-foreground) / 0.1),
+    0 8px 10px -6px hsl(var(--cfg-foreground) / 0.1);
+}
+
+/* Ensure proper z-index stacking */
+.configurator-root .z-10 {
+  z-index: 10;
+}
+.configurator-root .z-20 {
+  z-index: 20;
+}
+.configurator-root .z-30 {
+  z-index: 30;
+}
+.configurator-root .z-40 {
+  z-index: 40;
+}
+.configurator-root .z-50 {
+  z-index: 50;
+}
+
+/* ==========================================================================
+   ANIMATION SUPPORT
+   ========================================================================== */
+
+.configurator-root .animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Transition utilities */
+.configurator-root .transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.configurator-root .transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
