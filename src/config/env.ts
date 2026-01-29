@@ -19,6 +19,7 @@ export const env = {
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || "",
   STRIPE_MONTHLY_PRICE_ID: process.env.STRIPE_MONTHLY_PRICE_ID || "",
   STRIPE_YEARLY_PRICE_ID: process.env.STRIPE_YEARLY_PRICE_ID || "",
+  STRIPE_UPGRADE_PRODUCT_ID: process.env.STRIPE_UPGRADE_PRODUCT_ID || "", // Optional: For option upgrades
 
   // Resend
   RESEND_API_KEY: process.env.RESEND_API_KEY || "",
@@ -66,21 +67,21 @@ export function validateEnv() {
 
   if (missing.length > 0) {
     throw new Error(
-      `❌ Missing required environment variables: ${missing.join(", ")}`
+      `❌ Missing required environment variables: ${missing.join(", ")}`,
     );
   }
 
   // Validate NEXTAUTH_SECRET strength
   if (env.NEXTAUTH_SECRET.length < 32) {
     console.warn(
-      "⚠️  WARNING: NEXTAUTH_SECRET should be at least 32 characters for security"
+      "⚠️  WARNING: NEXTAUTH_SECRET should be at least 32 characters for security",
     );
   }
 
   // Warn about wildcard CORS in production
   if (env.NODE_ENV === "production" && env.CORS_ALLOWED_ORIGINS.includes("*")) {
     console.warn(
-      "⚠️  WARNING: CORS is set to allow all origins (*) in production. This is insecure! Set CORS_ALLOWED_ORIGINS to specific domains."
+      "⚠️  WARNING: CORS is set to allow all origins (*) in production. This is insecure! Set CORS_ALLOWED_ORIGINS to specific domains.",
     );
   }
 
@@ -93,20 +94,20 @@ export function validateEnv() {
   ];
 
   const missingOptional = optional.filter(
-    (key) => !env[key as keyof typeof env]
+    (key) => !env[key as keyof typeof env],
   );
 
   if (missingOptional.length > 0 && env.NODE_ENV === "production") {
     console.warn(
       `⚠️  WARNING: Missing optional environment variables (features may not work): ${missingOptional.join(
-        ", "
-      )}`
+        ", ",
+      )}`,
     );
   }
 
   console.log("✅ Environment variables validated successfully");
   console.log(
-    `📍 CORS allowed origins: ${env.CORS_ALLOWED_ORIGINS.join(", ")}`
+    `📍 CORS allowed origins: ${env.CORS_ALLOWED_ORIGINS.join(", ")}`,
   );
 }
 

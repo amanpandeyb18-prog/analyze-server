@@ -2,72 +2,67 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/src/lib/prisma";
-import { stripe } from "@/src/lib/stripe";
+import { BillingService } from "@/src/services/billing.service";
+import { success, fail } from "@/src/lib/response";
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email)
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-      });
+    if (!session?.user?.email) {
+      return fail("Unauthorized", "UNAUTHORIZED", 401);
+    }
 
     const client = await prisma.client.findUnique({
       where: { email: session.user.email },
-      select: { stripeCustomerId: true },
-    });
-
-    if (!client?.stripeCustomerId)
-      return new Response(
-        JSON.stringify({ error: "Missing Stripe customer" }),
-        { status: 400 }
-      );
-
-    const body = await req.json();
-    const { successUrl, cancelUrl } = body;
-
-    // Ensure success URL includes the Stripe checkout session id placeholder so
-    // the client can verify the session after redirect.
-    const baseSuccess =
-      successUrl ||
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?success=true`;
-    const successWithSession = baseSuccess.includes("{CHECKOUT_SESSION_ID}")
-      ? baseSuccess
-      : `${baseSuccess}${baseSuccess.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`;
-
-    const baseCancel =
-      cancelUrl ||
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?canceled=true`;
-
-    const checkout = await stripe.checkout.sessions.create({
-      mode: "payment",
-      customer: client.stripeCustomerId,
-      success_url: successWithSession,
-      cancel_url: baseCancel,
-      line_items: [
-        {
-          price_data: {
-            currency: "eur",
-            unit_amount: 1000, // €10
-            product_data: {
-              name: "+10 Option Capacity",
-              description: "Add 10 extra options for your configurator limit",
-            },
-          },
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        type: "OPTION_BLOCK", // <- REQUIRED so webhook knows what to do
+      select: {
+        id: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        subscriptionStatus: true,
+        subscriptionDuration: true,
       },
     });
 
-    return Response.json({ url: checkout.url });
+    if (!client?.stripeCustomerId) {
+      return fail("Missing Stripe customer", "NO_CUSTOMER", 400);
+    }
+
+    if (!client?.stripeSubscriptionId) {
+      return fail(
+        "No active subscription found. Please subscribe first.",
+        "NO_SUBSCRIPTION",
+        400,
+      );
+    }
+
+    if (client.subscriptionStatus !== "ACTIVE") {
+      return fail(
+        "Subscription is not active. Please ensure your subscription is active before upgrading.",
+        "INACTIVE_SUBSCRIPTION",
+        400,
+      );
+    }
+
+    // Add recurring upgrade to subscription
+    // This permanently increases the subscription price by €10/month or €100/year
+    await BillingService.addOptionCapacityUpgrade(
+      client.id,
+      client.stripeSubscriptionId,
+      client.subscriptionDuration || "MONTHLY",
+    );
+
+    return success({
+      message: "Option capacity upgraded successfully",
+      recurring: true,
+      amount: client.subscriptionDuration === "YEARLY" ? 100 : 10,
+      interval: client.subscriptionDuration === "YEARLY" ? "year" : "month",
+    });
   } catch (err: any) {
-    console.error("Stripe checkout error:", err);
-    return new Response(
-      JSON.stringify({ error: err.message || "internal error" }),
-      { status: 500 }
+    console.error("Option capacity upgrade error:", err);
+    return fail(
+      err.message || "Failed to upgrade option capacity",
+      "UPGRADE_ERROR",
+      500,
     );
   }
 }

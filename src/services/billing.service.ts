@@ -5,6 +5,8 @@ import {
   createCheckoutSession,
   createCustomer,
   createCustomerPortalSession,
+  addSubscriptionItem,
+  getOrCreateUpgradePrice,
 } from "@/src/lib/stripe";
 import { ClientService } from "./client.service";
 import type { SubscriptionStatus, SubscriptionDuration } from "@prisma/client";
@@ -16,7 +18,7 @@ export const BillingService = {
     clientId: string,
     duration: "MONTHLY" | "YEARLY",
     successUrl: string,
-    cancelUrl: string
+    cancelUrl: string,
   ) {
     const client = await ClientService.getById(clientId);
 
@@ -67,7 +69,7 @@ export const BillingService = {
       stripeSubscriptionId: string;
     },
     successUrl: string,
-    cancelUrl: string
+    cancelUrl: string,
   ) {
     const client = await ClientService.getById(clientId);
 
@@ -81,7 +83,7 @@ export const BillingService = {
     const totalDaysInMonth = 30; // Approximate
     const daysRemaining = Math.max(
       0,
-      Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
     );
     const daysUsed = totalDaysInMonth - daysRemaining;
 
@@ -94,7 +96,7 @@ export const BillingService = {
     // Amount to charge = yearly price - remaining credit
     const amountToCharge = Math.max(
       0,
-      Math.round((yearlyPrice - remainingCredit) * 100)
+      Math.round((yearlyPrice - remainingCredit) * 100),
     ); // in cents
 
     console.log("Upgrade proration calculation:", {
@@ -141,7 +143,7 @@ export const BillingService = {
           ? [
               {
                 coupon: await createProrationCoupon(
-                  Math.round(remainingCredit * 100)
+                  Math.round(remainingCredit * 100),
                 ),
               },
             ]
@@ -157,6 +159,74 @@ export const BillingService = {
     return session;
   },
 
+  /**
+   * Add recurring option capacity upgrade to existing subscription
+   * This permanently increases the subscription price by €10/month or €100/year
+   */
+  async addOptionCapacityUpgrade(
+    clientId: string,
+    stripeSubscriptionId: string,
+    subscriptionDuration: "MONTHLY" | "YEARLY",
+  ) {
+    try {
+      // Get subscription details
+      const subscription =
+        await stripe.subscriptions.retrieve(stripeSubscriptionId);
+
+      // Determine interval
+      const interval = subscriptionDuration === "YEARLY" ? "year" : "month";
+
+      // Get or create upgrade price
+      const upgradePriceId = await getOrCreateUpgradePrice(interval);
+
+      // Add subscription item (this will prorate automatically)
+      const subscriptionItem = await addSubscriptionItem(
+        stripeSubscriptionId,
+        upgradePriceId,
+        1,
+      );
+
+      console.log(
+        `Added option capacity upgrade to subscription ${stripeSubscriptionId}:`,
+        subscriptionItem.id,
+      );
+
+      // Update billing usage to track permanent upgrade
+      await prisma.billingUsage.upsert({
+        where: { clientId },
+        update: {
+          chargedBlocks: { increment: 1 },
+          lastSync: new Date(),
+        },
+        create: {
+          clientId,
+          chargedBlocks: 1,
+          totalPrimaryOptions: 0,
+        },
+      });
+
+      // Log audit event
+      await prisma.auditBillingEvent.create({
+        data: {
+          clientId,
+          event: "RECURRING_UPGRADE_ADDED",
+          details: {
+            subscriptionId: stripeSubscriptionId,
+            subscriptionItemId: subscriptionItem.id,
+            priceId: upgradePriceId,
+            interval,
+            amount: interval === "month" ? 1000 : 10000,
+          },
+        },
+      });
+
+      return subscriptionItem;
+    } catch (error: any) {
+      console.error("Failed to add option capacity upgrade:", error);
+      throw error;
+    }
+  },
+
   async createPortalSession(clientId: string, returnUrl: string) {
     const client = await ClientService.getById(clientId);
 
@@ -166,7 +236,7 @@ export const BillingService = {
 
     return await createCustomerPortalSession(
       client.stripeCustomerId,
-      returnUrl
+      returnUrl,
     );
   },
 
@@ -230,7 +300,7 @@ export const BillingService = {
           subscriptionId,
           priceId,
           stripeStatus,
-        }
+        },
       );
 
       await prisma.client.update({
@@ -245,7 +315,7 @@ export const BillingService = {
       });
 
       console.log(
-        `✅ Successfully updated client ${client.id} subscription status to ${status}`
+        `✅ Successfully updated client ${client.id} subscription status to ${status}`,
       );
     } catch (error: any) {
       console.error("Error in handleSubscriptionCreated:", {
@@ -284,7 +354,7 @@ export const BillingService = {
 // Helper function to create or get Stripe price
 async function createOrGetPrice(
   interval: "month" | "year",
-  amount: number
+  amount: number,
 ): Promise<string> {
   try {
     // Try to find existing product

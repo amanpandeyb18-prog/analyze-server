@@ -251,7 +251,7 @@ export default function BillingPage() {
           "Subscription canceled. Access continues until period end.",
           {
             duration: 5000,
-          }
+          },
         );
         setShowCancelDialog(false);
         await Promise.all([fetchBilling(), updateSession()]);
@@ -274,22 +274,35 @@ export default function BillingPage() {
       const res = await fetch("/api/billing/create-usage-upgrade-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          successUrl: `${window.location.origin}/dashboard/billing?success=true`,
-          cancelUrl: `${window.location.origin}/dashboard/billing?canceled=true`,
-        }),
+        body: JSON.stringify({}),
       });
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+
       const json = await res.json();
-      const data = json.data || json;
-      if (!data.url) throw new Error("No checkout URL received");
-      toast.loading("Redirecting to checkout...", { duration: 1200 });
-      window.location.href = data.url;
+
+      if (!res.ok) {
+        throw new Error(
+          json.error || json.message || `Request failed: ${res.status}`,
+        );
+      }
+
+      // Success - subscription upgraded
+      toast.success("Subscription upgraded! +10 option capacity added.", {
+        description:
+          json.data?.interval === "year"
+            ? "+€100/year added to your subscription"
+            : "+€10/month added to your subscription",
+        duration: 5000,
+      });
+
+      // Refresh data
+      await Promise.all([fetchBilling(), fetchTransactions(), fetchUsage()]);
+      await updateSession();
     } catch (e: any) {
       console.error("Add options failed:", e);
-      toast.error("Failed to start upgrade", {
+      toast.error("Failed to upgrade subscription", {
         description: e.message || "Please try again.",
       });
+    } finally {
       setActionLoading(false);
     }
   };
@@ -317,7 +330,7 @@ export default function BillingPage() {
       try {
         if (sessionId && !processedSessionsRef.current.has(sessionId)) {
           const res = await fetch(
-            `/api/billing/verify-session?session_id=${encodeURIComponent(sessionId)}`
+            `/api/billing/verify-session?session_id=${encodeURIComponent(sessionId)}`,
           );
           if (!res.ok) console.warn("verify-session failed", await res.text());
           processedSessionsRef.current.add(sessionId);
@@ -527,9 +540,9 @@ export default function BillingPage() {
                 Switch to Yearly
               </Button>
             )}
-            <Button onClick={handleAddOptionsBlock}>
+            <Button onClick={handleAddOptionsBlock} disabled={actionLoading}>
               <Plus className="mr-2 h-4 w-4" />
-              Add +10 Options
+              {actionLoading ? "Processing..." : "Add +10 Options (Recurring)"}
             </Button>
             {billing?.stripeCustomerId && isActive && (
               <Button onClick={handleManageBilling} variant="outline">
@@ -657,7 +670,7 @@ export default function BillingPage() {
                       until{" "}
                       {billing?.subscriptionEndsAt
                         ? new Date(
-                            billing.subscriptionEndsAt
+                            billing.subscriptionEndsAt,
                           ).toLocaleDateString()
                         : "the end of your billing period"}
                       .
@@ -767,7 +780,7 @@ export default function BillingPage() {
                           ) : (
                             <Plus className="mr-2 h-4 w-4" />
                           )}
-                          Add +10 Options Block
+                          Add +10 Options (Recurring)
                         </Button>
                       </div>
                     ) : (
@@ -783,13 +796,20 @@ export default function BillingPage() {
                             Processing...
                           </>
                         ) : (
-                          "Add +10 options for €10"
+                          <>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add +10 options (
+                            {currentPlan === "YEARLY"
+                              ? "€100/year"
+                              : "€10/month"}
+                            )
+                          </>
                         )}
                       </Button>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      This increases your capacity for options under primary
-                      categories.
+                      This permanently increases your subscription price and
+                      option capacity.
                     </p>
                   </>
                 ) : (

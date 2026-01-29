@@ -22,68 +22,9 @@ export async function POST(request: NextRequest) {
         // Subscription plan checkout
         if (session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(
-            session.subscription
+            session.subscription,
           );
           await BillingService.handleSubscriptionCreated(subscription);
-        }
-
-        // ✅ Option block one-time purchase
-        // ✅ Option capacity upgrade (+10 options)
-        if (session.mode === "payment") {
-          const type = session.metadata?.type;
-
-          if (type === "OPTION_BLOCK") {
-            const customerId = session.customer as string;
-
-            const client = await prisma.client.findFirst({
-              where: { stripeCustomerId: customerId },
-              select: { id: true },
-            });
-
-            if (client) {
-              // Count current primary options in DB
-              const currentOptions = await prisma.option.count({
-                where: {
-                  category: {
-                    isPrimary: true,
-                    configurator: { clientId: client.id },
-                  },
-                },
-              });
-
-              // Store +10 block
-              await prisma.billingUsage.upsert({
-                where: { clientId: client.id },
-                update: {
-                  chargedBlocks: { increment: 1 },
-                  totalPrimaryOptions: currentOptions,
-                  lastSync: new Date(),
-                },
-                create: {
-                  clientId: client.id,
-                  chargedBlocks: 1,
-                  totalPrimaryOptions: currentOptions,
-                },
-              });
-
-              // Log the transaction in audit
-              await prisma.auditBillingEvent.create({
-                data: {
-                  clientId: client.id,
-                  event: "OPTION_BLOCK_PURCHASED",
-                  details: {
-                    sessionId: session.id,
-                    paymentIntentId: session.payment_intent,
-                    amount: session.amount_total,
-                  },
-                },
-              });
-
-              console.log(
-                `[Billing] +10 options added for client ${client.id} — transaction logged.`
-              );
-            }
-          }
         }
 
         break;
@@ -100,7 +41,9 @@ export async function POST(request: NextRequest) {
         await BillingService.handleSubscriptionDeleted(event.data.object);
         break;
 
-      // ✅ Invoice paid = new billing cycle → reset block counter
+      // ✅ Invoice paid = billing cycle completed
+      // NOTE: We no longer reset chargedBlocks because upgrades are now permanent
+      // and tracked via subscription items in Stripe
       case "invoice.payment_succeeded": {
         const inv: any = event.data.object;
         const sub = inv.subscription as string;
@@ -108,10 +51,15 @@ export async function POST(request: NextRequest) {
           where: { stripeSubscriptionId: sub },
         });
         if (client) {
+          // Just update last sync - don't reset blocks anymore
           await prisma.billingUsage.updateMany({
             where: { clientId: client.id },
-            data: { chargedBlocks: 0, lastSync: new Date() },
+            data: { lastSync: new Date() },
           });
+
+          console.log(
+            `[Billing] Invoice paid for client ${client.id} - no reset needed (upgrades are permanent)`,
+          );
         }
         break;
       }
