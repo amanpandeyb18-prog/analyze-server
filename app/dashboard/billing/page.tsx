@@ -117,6 +117,7 @@ export default function BillingPage() {
   const [selectedPlan, setSelectedPlan] = useState<"MONTHLY" | "YEARLY" | null>(
     null,
   );
+  const [showAddOptionsDialog, setShowAddOptionsDialog] = useState(false);
 
   const handledSuccessRef = useRef(false);
   const processedSessionsRef = useRef<Set<string>>(new Set());
@@ -284,6 +285,7 @@ export default function BillingPage() {
 
   const handleAddOptionsBlock = async () => {
     setActionLoading(true);
+    setShowAddOptionsDialog(false);
     try {
       const res = await fetch("/api/billing/create-usage-upgrade-session", {
         method: "POST",
@@ -303,8 +305,8 @@ export default function BillingPage() {
       toast.success("Subscription upgraded! +10 option capacity added.", {
         description:
           json.data?.interval === "year"
-            ? "+€100/year added to your subscription"
-            : "+€10/month added to your subscription",
+            ? "+€100/year added to your subscription (starts next billing cycle)"
+            : "+€10/month added to your subscription (starts next billing cycle)",
         duration: 5000,
       });
 
@@ -554,9 +556,12 @@ export default function BillingPage() {
                 Switch to Yearly
               </Button>
             )}
-            <Button onClick={handleAddOptionsBlock} disabled={actionLoading}>
+            <Button
+              onClick={() => setShowAddOptionsDialog(true)}
+              disabled={actionLoading}
+            >
               <Plus className="mr-2 h-4 w-4" />
-              {actionLoading ? "Processing..." : "Add +10 Options (Recurring)"}
+              Add +10 Options (Recurring)
             </Button>
             {billing?.stripeCustomerId && isActive && (
               <Button onClick={handleManageBilling} variant="outline">
@@ -801,7 +806,7 @@ export default function BillingPage() {
                       <Button
                         className="w-full"
                         variant={usage.remaining <= 2 ? "default" : "outline"}
-                        onClick={handleAddOptionsBlock}
+                        onClick={() => setShowAddOptionsDialog(true)}
                         disabled={actionLoading}
                       >
                         {actionLoading ? (
@@ -1073,6 +1078,110 @@ export default function BillingPage() {
                   <>
                     Proceed to Checkout
                     <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Options Confirmation Dialog */}
+        <Dialog
+          open={showAddOptionsDialog}
+          onOpenChange={setShowAddOptionsDialog}
+        >
+          <DialogContent data-testid="add-options-confirmation-dialog">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-primary" />
+                Add 10 More Options
+              </DialogTitle>
+              <DialogDescription>
+                Confirm adding additional option capacity to your subscription
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="border rounded-lg p-4 bg-muted/30">
+                <h4 className="font-semibold mb-3">Upgrade Details</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Add-on:</span>
+                    <span className="font-medium">+10 Options</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Add-on Price:</span>
+                    <span className="font-bold text-primary">
+                      €
+                      {currentPlan === "YEARLY" ? "100.00/year" : "10.00/month"}
+                    </span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Current Subscription:
+                    </span>
+                    <span className="font-medium">
+                      €
+                      {currentPlan === "YEARLY" ? "999.00/year" : "99.00/month"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-base">
+                    <span className="font-semibold">
+                      Total from Next Billing Date:
+                    </span>
+                    <span className="font-bold text-primary">
+                      €
+                      {currentPlan === "YEARLY"
+                        ? "1,099.00/year"
+                        : "109.00/month"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Important:</strong> This is a fixed recurring charge.
+                  <br />
+                  • No immediate charge today
+                  <br />• Charge starts from your next billing date on{" "}
+                  {billing?.subscriptionEndsAt
+                    ? new Date(billing.subscriptionEndsAt).toLocaleDateString()
+                    : "your next billing cycle"}
+                  <br />• Permanently increases your subscription by €
+                  {currentPlan === "YEARLY" ? "100/year" : "10/month"}
+                </AlertDescription>
+              </Alert>
+
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>✓ Adds 10 additional options to your capacity</p>
+                <p>✓ No proration - fixed price starting next cycle</p>
+                <p>✓ Manage via Stripe billing portal anytime</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowAddOptionsDialog(false)}
+                disabled={actionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddOptionsBlock}
+                disabled={actionLoading}
+                data-testid="confirm-add-options-button"
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Confirm & Add Options
+                    <Check className="ml-2 h-4 w-4" />
                   </>
                 )}
               </Button>

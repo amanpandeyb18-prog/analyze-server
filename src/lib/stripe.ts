@@ -135,6 +135,11 @@ export async function updateSubscription(
 /**
  * Add a recurring subscription item (for option capacity upgrades)
  * This permanently increases the subscription price
+ *
+ * IMPORTANT: Uses "none" proration behavior to ensure fixed pricing
+ * - No immediate charge when adding capacity
+ * - Charge starts from next billing cycle
+ * - User pays full €10/month or €100/year from next billing date
  */
 export async function addSubscriptionItem(
   subscriptionId: string,
@@ -145,7 +150,7 @@ export async function addSubscriptionItem(
     subscription: subscriptionId,
     price: priceId,
     quantity,
-    proration_behavior: "always_invoice",
+    proration_behavior: "none", // Fixed price - no proration, starts next billing cycle
   });
 }
 
