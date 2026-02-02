@@ -113,6 +113,10 @@ export default function BillingPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [canceling, setCanceling] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"MONTHLY" | "YEARLY" | null>(
+    null,
+  );
 
   const handledSuccessRef = useRef(false);
   const processedSessionsRef = useRef<Set<string>>(new Set());
@@ -188,13 +192,23 @@ export default function BillingPage() {
   }, []);
 
   const handleSubscribe = async (duration: "MONTHLY" | "YEARLY") => {
+    // Show confirmation dialog first
+    setSelectedPlan(duration);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmSubscription = async () => {
+    if (!selectedPlan) return;
+
     setActionLoading(true);
+    setShowConfirmDialog(false);
+
     try {
       const response = await fetch("/api/billing/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          duration,
+          duration: selectedPlan,
           successUrl: `${window.location.origin}/dashboard/billing?success=true`,
           cancelUrl: `${window.location.origin}/dashboard/billing?canceled=true`,
         }),
@@ -963,6 +977,103 @@ export default function BillingPage() {
                   </>
                 ) : (
                   "Cancel Subscription"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Subscription Confirmation Dialog */}
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogContent data-testid="subscription-confirmation-dialog">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                Confirm Your Subscription
+              </DialogTitle>
+              <DialogDescription>
+                Please review your subscription details before proceeding
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="border rounded-lg p-4 bg-muted/30">
+                <h4 className="font-semibold mb-3">Plan Details</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Plan:</span>
+                    <span className="font-medium">
+                      {selectedPlan === "MONTHLY" ? "Monthly" : "Yearly"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Immediate Charge:
+                    </span>
+                    <span className="font-bold text-primary">
+                      €{selectedPlan === "MONTHLY" ? "10.00" : "100.00"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Recurring Amount:
+                    </span>
+                    <span className="font-medium">
+                      €
+                      {selectedPlan === "MONTHLY"
+                        ? "99.00/month"
+                        : "999.00/year"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Total today:</strong> €
+                  {selectedPlan === "MONTHLY" ? "10.00" : "100.00"}
+                  <br />
+                  <strong>Next billing:</strong> €
+                  {selectedPlan === "MONTHLY" ? "99.00" : "999.00"} (
+                  {selectedPlan === "MONTHLY" ? "monthly" : "yearly"})
+                </AlertDescription>
+              </Alert>
+
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>• One-time setup fee will be charged immediately</p>
+                <p>• Recurring subscription starts after the setup fee</p>
+                <p>
+                  • No proration - you pay the full recurring amount each period
+                </p>
+                <p>• Cancel anytime from your billing dashboard</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowConfirmDialog(false);
+                  setSelectedPlan(null);
+                }}
+                disabled={actionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmSubscription}
+                disabled={actionLoading}
+                data-testid="confirm-subscription-button"
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Proceed to Checkout
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
                 )}
               </Button>
             </DialogFooter>

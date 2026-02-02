@@ -24,8 +24,11 @@ import { toast } from "sonner";
 import Link from "next/link";
 import type { ApiResponse } from "@/src/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "http://localhost:3000";
+import {
+  generateEmbedScript,
+  generateEmbedPreviewUrl,
+  generateAdminConfiguratorUrl,
+} from "@/src/config/embed";
 
 interface ClientInfo {
   publicKey: string;
@@ -117,15 +120,11 @@ export default function EmbedPage() {
       <div className="grid gap-6 max-w-4xl">
         {/* Configurators */}
         {configurators.map((cfg) => {
-          const embedScript = `<!-- Konfigra Configurator: ${cfg.name} -->
-<div id="konfigra-${cfg.publicId}"></div>
-
-<script 
-  src="${appUrl}/embed/script.js"
-  data-public-key="${client?.publicKey}"
-  data-configurator-id="${cfg.publicId}"
-  data-container-id="konfigra-${cfg.publicId}">
-</script>`;
+          const embedScript = generateEmbedScript(
+            client?.publicKey || "",
+            cfg.publicId,
+            cfg.name,
+          );
 
           const expanded = expandedIds.has(cfg.id);
 
@@ -144,8 +143,11 @@ export default function EmbedPage() {
                     variant="outline"
                     onClick={() =>
                       window.open(
-                        `/embed/configurator?publicKey=${client?.publicKey}&configuratorId=${cfg.publicId}`,
-                        "_blank"
+                        generateEmbedPreviewUrl(
+                          client?.publicKey || "",
+                          cfg.publicId,
+                        ),
+                        "_blank",
                       )
                     }
                   >
@@ -154,7 +156,12 @@ export default function EmbedPage() {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => window.open(`/admin/configurator/${cfg.publicId}`, "_blank")}
+                    onClick={() =>
+                      window.open(
+                        generateAdminConfiguratorUrl(cfg.publicId),
+                        "_blank",
+                      )
+                    }
                   >
                     <Settings className="h-4 w-4 mr-1" />
                     Manage

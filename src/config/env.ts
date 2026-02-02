@@ -57,6 +57,11 @@ export const env = {
 
   // Next.js Public Variables (client-side)
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || "",
+  NEXT_PUBLIC_EMBED_URL:
+    process.env.NEXT_PUBLIC_EMBED_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    "",
 };
 
 // ✅ Fixed: Strict environment validation

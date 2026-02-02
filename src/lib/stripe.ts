@@ -32,6 +32,61 @@ export async function createCheckoutSession({
   });
 }
 
+/**
+ * Create checkout session with immediate one-time charge + recurring subscription
+ * - Immediate charge: €10 for monthly, €100 for yearly
+ * - Recurring subscription: €99/month or €999/year
+ * - No proration behavior
+ */
+export async function createCheckoutSessionWithImmediateCharge({
+  customerId,
+  priceId,
+  immediateCharge,
+  successUrl,
+  cancelUrl,
+}: {
+  customerId?: string;
+  priceId: string;
+  immediateCharge: number; // in cents (1000 = €10, 10000 = €100)
+  successUrl: string;
+  cancelUrl: string;
+}) {
+  const lineItems = [
+    // Recurring subscription item
+    {
+      price: priceId,
+      quantity: 1,
+    },
+  ];
+
+  // Add one-time immediate charge if specified
+  if (immediateCharge > 0) {
+    lineItems.push({
+      price_data: {
+        currency: "eur",
+        product_data: {
+          name: "Subscription Setup Fee",
+          description: "One-time setup fee for your subscription",
+        },
+        unit_amount: immediateCharge,
+      },
+      quantity: 1,
+    });
+  }
+
+  return await stripe.checkout.sessions.create({
+    customer: customerId,
+    mode: "subscription",
+    payment_method_types: ["card", "paypal"],
+    line_items: lineItems,
+    subscription_data: {
+      proration_behavior: "none", // No proration
+    },
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+  });
+}
+
 export async function createCustomer({
   email,
   name,
