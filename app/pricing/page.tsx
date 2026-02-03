@@ -25,6 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
 import UserWidget from "@/components/user-widget";
+import Image from "next/image";
 
 export default function PricingPage() {
   const plans = [
@@ -120,200 +121,266 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      {/* NAVBAR */}
-      <nav className="sticky top-0 z-20 border-b border-border/40 bg-background/70 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-slate-50 text-slate-900"
+      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+    >
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to home
           </Link>
-          <UserWidget />
+          <div className="flex items-center gap-2">
+            <Link href="/">
+              <Image src={"/logo.png"} alt="logo" height={64} width={256} />
+            </Link>
+          </div>
+          {/* Add UserWidget here when integrating auth */}
         </div>
       </nav>
 
-      {/* HEADER */}
-      <section className="container mx-auto px-4 py-20 max-w-6xl text-center">
-        <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-8">
-          <Sparkles className="h-4 w-4" />
-          Simple, transparent pricing
+      {/* Header */}
+      <section className="px-6 py-20 text-center">
+        <div className="max-w-6xl mx-auto">
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 border rounded-full mb-8 backdrop-blur-sm"
+            style={{
+              background: "rgba(0, 127, 143, 0.1)",
+              borderColor: "rgba(0, 127, 143, 0.3)",
+            }}
+          >
+            <Sparkles className="w-4 h-4" style={{ color: "#007f8f" }} />
+            <span className="text-sm font-medium" style={{ color: "#007f8f" }}>
+              Simple, transparent pricing
+            </span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            Simple, Transparent Pricing
+          </h1>
+          <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Start free. Scale when you're ready. ROI guaranteed.
+          </p>
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-900 dark:from-slate-100 dark:via-blue-200 dark:to-indigo-200">
-          Choose Your Perfect Plan
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Unlock the full power of Konfigra. Every plan includes complete access
-          to our core features and developer APIs.
-        </p>
       </section>
 
-      {/* PLANS */}
-      <section className="container mx-auto px-4 max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-10">
-        {plans.map((plan) => {
-          const userHasThisPlan =
-            (session?.user?.subscriptionStatus === "ACTIVE" &&
-              session?.user?.subscriptionDuration?.toLowerCase() ===
-                plan.duration) ||
-            session?.user?.subscriptionDuration === "YEARLY";
+      {/* Plans */}
+      <section className="px-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {plans.map((plan) => {
+            const userHasThisPlan = false; // Replace with actual logic when integrating auth
 
-          return (
-            <Card
-              key={plan.duration}
-              className={`relative transition-all rounded-3xl backdrop-blur-lg ${
-                plan.popular
-                  ? "border-2 border-blue-600 shadow-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/70 dark:from-blue-950/20 dark:to-indigo-950/20 scale-[1.03]"
-                  : "border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:border-blue-400/70"
-              }`}
-            >
-              {plan.popular && (
-                <Badge className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold py-2 px-5 rounded-full flex items-center gap-2 shadow-md">
-                  <Crown className="h-4 w-4" /> Most Popular
-                </Badge>
-              )}
-
-              <CardHeader className="text-center pt-10">
-                <CardTitle className="text-2xl font-bold">
-                  {plan.name}
-                </CardTitle>
-                <CardDescription className="mt-2 text-base text-muted-foreground">
-                  {plan.description}
-                </CardDescription>
-                <div className="mt-4">
-                  <span
-                    className={`text-5xl font-extrabold ${
-                      plan.popular
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-slate-800 dark:text-slate-300"
-                    }`}
-                  >
-                    {plan.price}
-                  </span>
-                  <span className="ml-2 text-muted-foreground">
-                    {plan.period}
-                  </span>
-                  {plan.monthlyEquivalent && (
-                    <p className="mt-1 text-blue-600 dark:text-blue-400 text-sm font-medium">
-                      Only {plan.monthlyEquivalent}/month — billed annually
-                    </p>
-                  )}
-                </div>
-                {plan.savings && (
-                  <div className="inline-flex items-center gap-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-sm mt-2">
-                    <Check className="h-4 w-4" />
-                    {plan.savings}
+            return (
+              <div
+                key={plan.duration}
+                className={`relative rounded-3xl transition-all ${
+                  plan.popular
+                    ? "border-2 shadow-2xl scale-[1.02]"
+                    : "border bg-white/90 shadow-sm hover:shadow-xl"
+                }`}
+                style={{
+                  borderColor: plan.popular ? "#007f8f" : "rgb(226, 232, 240)",
+                  background: plan.popular
+                    ? "linear-gradient(to bottom right, rgba(0, 127, 143, 0.1), rgba(0, 163, 184, 0.1))"
+                    : undefined,
+                }}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold py-2 px-5 rounded-full flex items-center gap-2 shadow-md">
+                    <Crown className="h-4 w-4" /> Best Value
                   </div>
                 )}
-              </CardHeader>
 
-              <CardContent className="flex flex-col justify-between h-full px-6 pb-8 space-y-6">
-                <Separator />
-                <div>
-                  <h4 className="text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-3">
-                    Core Features
-                  </h4>
-                  <ul className="space-y-2">
-                    {plan.coreFeatures.map((f, i) => (
-                      <li key={i} className="flex gap-2 text-sm">
-                        <Check className="h-4 w-4 text-blue-500 mt-0.5" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {plan.premiumFeatures.length > 0 && (
-                  <div>
-                    <button
-                      onClick={() =>
-                        setExpandedPlan(
-                          expandedPlan === plan.duration ? null : plan.duration
-                        )
-                      }
-                      className="flex items-center gap-2 text-xs font-semibold uppercase text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-4"
+                <div className="text-center pt-10 px-6">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                    {plan.name}
+                  </h2>
+                  <p className="text-base text-slate-600 mb-4">
+                    {plan.description}
+                  </p>
+                  <div className="mb-4">
+                    <span
+                      className="text-5xl font-extrabold"
+                      style={{ color: plan.popular ? "#007f8f" : "#0f172a" }}
                     >
-                      Premium Extras
-                      {expandedPlan === plan.duration ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </button>
-                    {expandedPlan === plan.duration && (
-                      <ul className="space-y-2 mt-2">
-                        {plan.premiumFeatures.map((f, i) => (
-                          <li key={i} className="flex gap-2 text-sm">
-                            <Check className="h-4 w-4 text-blue-500 mt-0.5" />
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
+                      {plan.price}
+                    </span>
+                    <span className="ml-2 text-slate-500">{plan.period}</span>
+                    {plan.monthlyEquivalent && (
+                      <p
+                        className="mt-1 text-sm font-medium"
+                        style={{ color: "#007f8f" }}
+                      >
+                        Only {plan.monthlyEquivalent}/month — billed annually
+                      </p>
                     )}
                   </div>
-                )}
-
-                <div className="pt-6">
-                  <Button
-                    onClick={() =>
-                      handleSubscribe(plan.duration as "monthly" | "yearly")
-                    }
-                    disabled={loading || userHasThisPlan}
-                    className={`w-full py-6 font-semibold text-base transition-all ${
-                      userHasThisPlan
-                        ? "opacity-70 cursor-not-allowed"
-                        : plan.popular
-                          ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
-                          : "border-2 hover:border-blue-400"
-                    }`}
-                    variant={
-                      plan.popular && !userHasThisPlan ? "default" : "outline"
-                    }
-                  >
-                    {userHasThisPlan
-                      ? "Already Subscribed"
-                      : loading
-                        ? "Processing..."
-                        : "Get Started"}
-                  </Button>
-                  <p className="text-xs text-center mt-3 text-muted-foreground italic">
-                    {plan.cta}
-                  </p>
+                  {plan.savings && (
+                    <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                      <Check className="h-4 w-4" />
+                      {plan.savings}
+                    </div>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+
+                <div className="px-6 pb-8 pt-6 space-y-6">
+                  <div className="border-t border-slate-200"></div>
+
+                  <div>
+                    <h4 className="text-xs font-semibold uppercase text-slate-600 mb-3">
+                      Core Features
+                    </h4>
+                    <ul className="space-y-2">
+                      {plan.coreFeatures.map((f, i) => (
+                        <li
+                          key={i}
+                          className="flex gap-2 text-sm text-slate-700"
+                        >
+                          <Check
+                            className="h-4 w-4 mt-0.5 flex-shrink-0"
+                            style={{ color: "#007f8f" }}
+                          />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {plan.premiumFeatures.length > 0 && (
+                    <div>
+                      <button
+                        onClick={() =>
+                          setExpandedPlan(
+                            expandedPlan === plan.duration
+                              ? null
+                              : plan.duration,
+                          )
+                        }
+                        className="flex items-center gap-2 text-xs font-semibold uppercase transition-colors"
+                        style={{ color: "#007f8f" }}
+                      >
+                        Premium Extras
+                        {expandedPlan === plan.duration ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </button>
+                      {expandedPlan === plan.duration && (
+                        <ul className="space-y-2 mt-2">
+                          {plan.premiumFeatures.map((f, i) => (
+                            <li
+                              key={i}
+                              className="flex gap-2 text-sm text-slate-700"
+                            >
+                              <Check
+                                className="h-4 w-4 mt-0.5 flex-shrink-0"
+                                style={{ color: "#007f8f" }}
+                              />
+                              {f}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="pt-6">
+                    <button
+                      onClick={() =>
+                        handleSubscribe(plan.duration as "monthly" | "yearly")
+                      }
+                      disabled={loading || userHasThisPlan}
+                      className={`w-full py-3 rounded-lg font-semibold transition-all ${
+                        userHasThisPlan
+                          ? "opacity-70 cursor-not-allowed bg-slate-100 text-slate-500"
+                          : plan.popular
+                            ? "text-white shadow-lg hover:opacity-90"
+                            : "border-2 border-slate-300 hover:border-slate-400 bg-white"
+                      }`}
+                      style={
+                        !userHasThisPlan && plan.popular
+                          ? { background: "#007f8f" }
+                          : undefined
+                      }
+                    >
+                      {userHasThisPlan
+                        ? "Already Subscribed"
+                        : loading
+                          ? "Processing..."
+                          : "Get Started"}
+                    </button>
+                    <p className="text-xs text-center mt-3 text-slate-500 italic">
+                      {plan.cta}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
-      {/* EXTRAS */}
-      <section className="container mx-auto px-4 py-20 max-w-4xl text-center">
-        <Card className="bg-gradient-to-br from-slate-900 to-blue-900 text-white border-0 shadow-xl">
-          <CardContent className="p-8 flex flex-col md:flex-row gap-6 items-center">
-            <div className="p-4 bg-white/10 rounded-2xl">
-              <Database className="h-12 w-12 text-blue-200" />
+      {/* Extras */}
+      <section className="px-6 py-20 max-w-4xl mx-auto text-center">
+        <div
+          className="rounded-2xl text-white border-0 shadow-xl p-8"
+          style={{
+            background: "linear-gradient(to bottom right, #007f8f, #00a3b8)",
+          }}
+        >
+          <div className="flex flex-col md:flex-row gap-6 items-center">
+            <div className="p-4 bg-white/15 rounded-2xl">
+              <Database className="h-12 w-12 text-white" />
             </div>
             <div className="text-left">
               <h3 className="text-2xl font-bold mb-2">Need More Options?</h3>
-              <p className="text-blue-100">
+              <p className="text-cyan-100">
                 All plans include{" "}
-                <span className="font-semibold">10 options</span> for your
-                configurators. Add extra capacity anytime for only €10 per 10
-                options — directly from your billing dashboard.
+                <span className="font-semibold text-white">10 options</span> for
+                your configurators. Add extra capacity anytime for only €10 per
+                10 options — directly from your billing dashboard.
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-border/40 py-8 px-4 bg-white/40 dark:bg-slate-950/40 backdrop-blur-sm">
-        <div className="container mx-auto max-w-6xl flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            © 2025 KONFIGRA. All rights reserved.
-          </p>
-          <ThemeToggle />
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-slate-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white"
+                style={{ background: "#007f8f" }}
+              >
+                K
+              </div>
+              <span className="text-xl font-bold">KONFIGRA</span>
+            </div>
+            <div className="flex gap-8 text-slate-600">
+              <a href="#" className="hover:text-slate-900 transition-colors">
+                Privacy
+              </a>
+              <a href="#" className="hover:text-slate-900 transition-colors">
+                Terms
+              </a>
+              <a href="#" className="hover:text-slate-900 transition-colors">
+                Support
+              </a>
+              <a href="#" className="hover:text-slate-900 transition-colors">
+                Contact
+              </a>
+            </div>
+            <div className="text-slate-600 text-sm">
+              © 2025 KONFIGRA. All rights reserved.
+            </div>
+          </div>
         </div>
       </footer>
     </div>
