@@ -26,6 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
 import UserWidget from "@/components/user-widget";
 import Image from "next/image";
+import Logo from "@/components/logo";
 
 export default function PricingPage() {
   const plans = [
@@ -136,9 +137,7 @@ export default function PricingPage() {
             Back to home
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/">
-              <Image src={"/logo.png"} alt="logo" height={64} width={256} />
-            </Link>
+            <Logo />
           </div>
           {/* Add UserWidget here when integrating auth */}
         </div>
