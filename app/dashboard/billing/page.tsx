@@ -942,7 +942,10 @@ export default function BillingPage() {
 
         {/* Cancel Subscription Dialog */}
         <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-          <DialogContent data-testid="cancel-subscription-dialog">
+          <DialogContent
+            className="max-w-md"
+            data-testid="cancel-subscription-dialog"
+          >
             <DialogHeader>
               <DialogTitle>Cancel Subscription</DialogTitle>
               <DialogDescription>
@@ -990,7 +993,10 @@ export default function BillingPage() {
 
         {/* Subscription Confirmation Dialog */}
         <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-          <DialogContent data-testid="subscription-confirmation-dialog">
+          <DialogContent
+            className="max-w-2xl"
+            data-testid="subscription-confirmation-dialog"
+          >
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
@@ -1090,7 +1096,10 @@ export default function BillingPage() {
           open={showAddOptionsDialog}
           onOpenChange={setShowAddOptionsDialog}
         >
-          <DialogContent data-testid="add-options-confirmation-dialog">
+          <DialogContent
+            className="max-w-2xl"
+            data-testid="add-options-confirmation-dialog"
+          >
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Plus className="h-5 w-5 text-primary" />

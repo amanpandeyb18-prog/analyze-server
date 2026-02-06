@@ -44,23 +44,28 @@ export function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link
-              href={"/register"}
-              className="group px-8 py-4 rounded-xl font-semibold text-lg text-white hover:opacity-90 transition-all shadow-2xl flex items-center justify-center gap-2"
+            <Button
+              asChild
+              size="lg"
+              className="group px-8 py-4 rounded-xl font-semibold text-lg text-white hover:opacity-90 transition-all shadow-2xl"
               style={{
                 background: "#007f8f",
                 boxShadow: "0 20px 60px rgba(0, 127, 143, 0.3)",
               }}
             >
-              Get Started
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href={"/#demo"}
-              className="px-8 py-4 bg-white border border-slate-300 rounded-xl font-semibold text-lg hover:bg-slate-50 transition-all"
+              <Link href={"/register"}>
+                Get Started
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="px-8 py-4 rounded-xl font-semibold text-lg"
             >
-              Watch Demo
-            </Link>
+              <Link href="/#demo">Watch Demo</Link>
+            </Button>
           </div>
 
           {/* Stats */}

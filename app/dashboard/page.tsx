@@ -137,7 +137,7 @@ export default function DashboardPage() {
           },
         ]);
         setStats((prev) =>
-          prev ? { ...prev, configurators: prev.configurators + 1 } : null
+          prev ? { ...prev, configurators: prev.configurators + 1 } : null,
         );
       } else {
         toast.error(data.message || "Failed to create configurator");
@@ -285,7 +285,7 @@ export default function DashboardPage() {
                     onClick={() =>
                       window.open(
                         `/embed/configurator?configuratorId=${cfg.publicId}&publicKey=${publicKey}`,
-                        "_blank"
+                        "_blank",
                       )
                     }
                   >
@@ -293,7 +293,12 @@ export default function DashboardPage() {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => window.open(`/admin/configurator/${cfg.publicId}`, "_blank")}
+                    onClick={() =>
+                      window.open(
+                        `/admin/configurator/${cfg.publicId}`,
+                        "_blank",
+                      )
+                    }
                   >
                     <Settings className="h-4 w-4 mr-1" /> Manage
                   </Button>
@@ -306,7 +311,7 @@ export default function DashboardPage() {
 
       {/* Create Configurator Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />

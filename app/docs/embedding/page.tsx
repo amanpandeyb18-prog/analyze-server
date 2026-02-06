@@ -4,7 +4,7 @@ import { ArrowLeft, Copy } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 
-export default function EmbeddingGuidePage() {
+export default function EmbeddingDocs() {
   const embedCode = `<!-- KONFIGRA Configurator Embed -->
 <div id="konfigra-configurator"></div>
 <script>
@@ -21,7 +21,10 @@ export default function EmbeddingGuidePage() {
     <div className="min-h-screen bg-background">
       <nav className="border-b border-border/40 bg-background/95 backdrop-blur">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
             <ArrowLeft className="h-4 w-4" />
             Back to home
           </Link>
@@ -55,14 +58,20 @@ export default function EmbeddingGuidePage() {
               <CardTitle>Step 2: Add to Your Website</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
-              <p>Paste the embed code where you want the configurator to appear:</p>
+              <p>
+                Paste the embed code where you want the configurator to appear:
+              </p>
               <div className="relative mt-4">
                 <pre className="p-4 bg-muted rounded-lg overflow-x-auto font-mono text-sm">
                   <code>{embedCode}</code>
                 </pre>
               </div>
               <p className="mt-4">
-                Replace <code className="bg-muted px-2 py-1 rounded">YOUR_PUBLIC_KEY</code> with your actual public key from the dashboard.
+                Replace{" "}
+                <code className="bg-muted px-2 py-1 rounded">
+                  YOUR_PUBLIC_KEY
+                </code>{" "}
+                with your actual public key from the dashboard.
               </p>
             </CardContent>
           </Card>
@@ -72,9 +81,12 @@ export default function EmbeddingGuidePage() {
               <CardTitle>Step 3: Configure Container</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
-              <p>You can style the container div to control sizing and positioning:</p>
+              <p>
+                You can style the container div to control sizing and
+                positioning:
+              </p>
               <pre className="p-4 bg-muted rounded-lg overflow-x-auto font-mono text-sm mt-4">
-{`<div id="konfigra-configurator" 
+                {`<div id="konfigra-configurator" 
      style="max-width: 1200px; margin: 0 auto;">
 </div>`}
               </pre>
@@ -101,7 +113,9 @@ export default function EmbeddingGuidePage() {
                 <ol className="list-decimal pl-6 space-y-2">
                   <li>Go to Online Store &gt; Themes</li>
                   <li>Click "Edit code" on your active theme</li>
-                  <li>Open the template where you want to add the configurator</li>
+                  <li>
+                    Open the template where you want to add the configurator
+                  </li>
                   <li>Paste the embed code</li>
                   <li>Save the changes</li>
                 </ol>
@@ -121,9 +135,12 @@ export default function EmbeddingGuidePage() {
 
               <div>
                 <h4 className="font-semibold mb-2">Custom HTML/React</h4>
-                <p>Simply paste the code into your HTML or use dangerouslySetInnerHTML in React:</p>
+                <p>
+                  Simply paste the code into your HTML or use
+                  dangerouslySetInnerHTML in React:
+                </p>
                 <pre className="p-4 bg-muted rounded-lg overflow-x-auto font-mono text-sm mt-2">
-{`<div 
+                  {`<div 
   dangerouslySetInnerHTML={{ __html: embedCode }}
 />`}
                 </pre>
@@ -138,7 +155,7 @@ export default function EmbeddingGuidePage() {
             <CardContent className="space-y-4 text-muted-foreground">
               <p>You can pass additional configuration via data attributes:</p>
               <pre className="p-4 bg-muted rounded-lg overflow-x-auto font-mono text-sm mt-4">
-{`<script
+                {`<script
   src="https://your-domain.com/embed.js"
   data-public-key="YOUR_PUBLIC_KEY"
   data-configurator-id="config_123"

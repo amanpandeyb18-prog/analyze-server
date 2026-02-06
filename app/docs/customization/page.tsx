@@ -8,7 +8,10 @@ export default function CustomizationPage() {
     <div className="min-h-screen bg-background">
       <nav className="border-b border-border/40 bg-background/95 backdrop-blur">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
             <ArrowLeft className="h-4 w-4" />
             Back to home
           </Link>
@@ -29,18 +32,34 @@ export default function CustomizationPage() {
               <CardTitle>Theme Customization</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
-              <p>Customize the look and feel of your configurator with themes. You can set:</p>
+              <p>
+                Customize the look and feel of your configurator with themes.
+                You can set:
+              </p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Primary Color:</strong> Main brand color used for buttons and accents</li>
-                <li><strong>Secondary Color:</strong> Supporting color for secondary elements</li>
-                <li><strong>Background Color:</strong> Main background color</li>
-                <li><strong>Text Color:</strong> Primary text color</li>
-                <li><strong>Border Radius:</strong> Roundness of corners (e.g., 0.5rem)</li>
+                <li>
+                  <strong>Primary Color:</strong> Main brand color used for
+                  buttons and accents
+                </li>
+                <li>
+                  <strong>Secondary Color:</strong> Supporting color for
+                  secondary elements
+                </li>
+                <li>
+                  <strong>Background Color:</strong> Main background color
+                </li>
+                <li>
+                  <strong>Text Color:</strong> Primary text color
+                </li>
+                <li>
+                  <strong>Border Radius:</strong> Roundness of corners (e.g.,
+                  0.5rem)
+                </li>
               </ul>
               <div className="mt-4">
                 <p className="font-semibold mb-2">Example Configuration:</p>
                 <pre className="p-4 bg-muted rounded-lg overflow-x-auto font-mono text-sm">
-{`{
+                  {`{
   "primaryColor": "#0ea5e9",
   "secondaryColor": "#8b5cf6",
   "backgroundColor": "#ffffff",
@@ -59,14 +78,21 @@ export default function CustomizationPage() {
             <CardContent className="space-y-4 text-muted-foreground">
               <p>Customize fonts to match your brand identity:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Font Family:</strong> Primary font (e.g., "Inter", "Roboto")</li>
-                <li><strong>Heading Font:</strong> Font for headings (optional)</li>
-                <li><strong>Body Font:</strong> Font for body text (optional)</li>
+                <li>
+                  <strong>Font Family:</strong> Primary font (e.g., "Inter",
+                  "Roboto")
+                </li>
+                <li>
+                  <strong>Heading Font:</strong> Font for headings (optional)
+                </li>
+                <li>
+                  <strong>Body Font:</strong> Font for body text (optional)
+                </li>
               </ul>
               <div className="mt-4">
                 <p className="font-semibold mb-2">Example:</p>
                 <pre className="p-4 bg-muted rounded-lg overflow-x-auto font-mono text-sm">
-{`{
+                  {`{
   "fontFamily": "Inter, sans-serif",
   "headingFont": "Poppins, sans-serif"
 }`}
@@ -81,10 +107,11 @@ export default function CustomizationPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
               <p>
-                For advanced customization, you can add custom CSS to override default styles:
+                For advanced customization, you can add custom CSS to override
+                default styles:
               </p>
               <pre className="p-4 bg-muted rounded-lg overflow-x-auto font-mono text-sm mt-4">
-{`.configurator-container {
+                {`.configurator-container {
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -107,9 +134,18 @@ export default function CustomizationPage() {
             <CardContent className="space-y-4 text-muted-foreground">
               <p>Customize the layout of your configurator:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Max Width:</strong> Maximum width of the configurator (e.g., "1200px")</li>
-                <li><strong>Spacing Unit:</strong> Base spacing unit (e.g., "1rem")</li>
-                <li><strong>Grid Columns:</strong> Number of columns for option display</li>
+                <li>
+                  <strong>Max Width:</strong> Maximum width of the configurator
+                  (e.g., "1200px")
+                </li>
+                <li>
+                  <strong>Spacing Unit:</strong> Base spacing unit (e.g.,
+                  "1rem")
+                </li>
+                <li>
+                  <strong>Grid Columns:</strong> Number of columns for option
+                  display
+                </li>
               </ul>
             </CardContent>
           </Card>
@@ -121,10 +157,19 @@ export default function CustomizationPage() {
             <CardContent className="space-y-4 text-muted-foreground">
               <p>Control how your configurator behaves:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Allow Quotes:</strong> Enable/disable quote generation</li>
-                <li><strong>Require Email:</strong> Require email for quotes</li>
-                <li><strong>Auto Pricing:</strong> Automatically calculate total price</li>
-                <li><strong>Show Total:</strong> Display total price to users</li>
+                <li>
+                  <strong>Allow Quotes:</strong> Enable/disable quote generation
+                </li>
+                <li>
+                  <strong>Require Email:</strong> Require email for quotes
+                </li>
+                <li>
+                  <strong>Auto Pricing:</strong> Automatically calculate total
+                  price
+                </li>
+                <li>
+                  <strong>Show Total:</strong> Display total price to users
+                </li>
               </ul>
             </CardContent>
           </Card>
