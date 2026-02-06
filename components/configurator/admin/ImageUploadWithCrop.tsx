@@ -412,7 +412,7 @@ export function ImageUploadWithCrop({
                     />
                   </div>
                   <p className="text-xs text-center text-muted-foreground">
-                    Uploading to Azure Blob Storage... {uploadProgress}%
+                    Uploading file... {uploadProgress}%
                   </p>
                 </div>
               )}
@@ -872,7 +872,7 @@ export const ImageUploadWithCropForwardRef = React.forwardRef<
                     />
                   </div>
                   <p className="text-xs text-center text-muted-foreground">
-                    Uploading to Azure Blob Storage... {uploadProgress}%
+                    Uploading file... {uploadProgress}%
                   </p>
                 </div>
               )}
