@@ -27,8 +27,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   generateEmbedPreviewUrl,
   generateAdminConfiguratorUrl,
+  getEmbedUrl,
 } from "@/src/config/embed";
-import { env } from "@/src/config/env";
 
 interface ClientInfo {
   publicKey: string;
@@ -78,21 +78,19 @@ function escapeForHtmlAttr(s: string) {
 }
 
 /**
- * All framework snippets now use the single embed CDN script:
- *   https://cdn.konfigra.com/embed.js
+ * All framework snippets now use the embed loader:
+ *   {embedUrl}/embed/script.js
  *
- * Each snippet ensures the script is loaded (avoiding duplicate inserts)
- * and then calls window.Konfigra.render(...) when ready.
+ * Each snippet injects a script tag with data attributes that the loader reads.
  */
 function generateFrameworkSnippet(
   framework: FrameworkId,
   publicKey: string,
   publicId: string,
-  name = "",
 ) {
   const pk = escapeForHtmlAttr(publicKey || "");
   const id = escapeForHtmlAttr(publicId || "");
-  const safeName = name ? name.replace(/"/g, '\\"') : "";
+  const embedUrl = getEmbedUrl();
 
   // Common loader that checks for an existing script and renders once loaded.
   // For snippets that accept an element, we pass an element selector or element ref.
@@ -100,71 +98,48 @@ function generateFrameworkSnippet(
     case "vanilla":
       return `<!-- Konfigra Embed (Vanilla JS) -->
 <div id="konfigra-root-${id}"></div>
-<script>
-(function () {
-  function init() {
-    if (window.Konfigra && typeof window.Konfigra.render === "function") {
-      window.Konfigra.render({
-        element: "#konfigra-root-${id}",
-        publicKey: "${pk}",
-        configId: "${id}"
-      });
-    }
-  }
-
-  if (!document.getElementById("konfigra-embed-script")) {
-    var s = document.createElement("script");
-    s.id = "konfigra-embed-script";
-    s.src = "https://cdn.konfigra.com/embed.js";
-    s.async = true;
-    s.onload = init;
-    document.head.appendChild(s);
-  } else {
-    init();
-  }
-})();
+<script
+  src="${embedUrl}/embed/script.js"
+  data-public-key="${pk}"
+  data-configurator-id="${id}"
+  data-container-id="konfigra-root-${id}">
 </script>
 <!-- End Konfigra Embed -->`;
 
     case "react":
-      return `// React - functional component (uses the same CDN script)
+      return `// React - functional component (uses the embed loader script)
 import React, { useEffect, useRef } from "react";
 
 export default function KonfigraEmbed() {
   const mountRef = useRef(null);
 
   useEffect(() => {
-    function init() {
-      if (window.Konfigra && typeof window.Konfigra.render === "function") {
-        window.Konfigra.render({
-          element: mountRef.current,
-          publicKey: "${pk}",
-          configId: "${id}"
-        });
-      }
-    }
+    if (!mountRef.current) return;
 
-    const existing = document.getElementById("konfigra-embed-script");
-    if (!existing) {
-      const s = document.createElement("script");
-      s.id = "konfigra-embed-script";
-      s.src = "https://cdn.konfigra.com/embed.js";
-      s.async = true;
-      s.onload = init;
-      document.head.appendChild(s);
-    } else {
-      init();
-    }
+    const containerId = "konfigra-root-${id}";
+    mountRef.current.id = containerId;
 
-    // optionally cleanup if Konfigra offers an unmount API
+    const existing = document.querySelector(
+      'script[data-configurator-id="${id}"]'
+    );
+    if (existing) return;
+
+    const s = document.createElement("script");
+    s.src = "${embedUrl}/embed/script.js";
+    s.async = true;
+    s.setAttribute("data-public-key", "${pk}");
+    s.setAttribute("data-configurator-id", "${id}");
+    s.setAttribute("data-container-id", containerId);
+    mountRef.current.appendChild(s);
+
     return () => {
-      if (mountRef.current && window.Konfigra && typeof window.Konfigra.unmount === "function") {
-        try { window.Konfigra.unmount({ element: mountRef.current }); } catch (e) {}
+      if (mountRef.current) {
+        mountRef.current.innerHTML = "";
       }
-    };
+    }
   }, []);
 
-  return <div ref={mountRef} id={"konfigra-root-${id}"} />;
+  return <div ref={mountRef} />;
 }
 `;
 
@@ -178,36 +153,32 @@ export default function KonfigraEmbedClient() {
   const mountRef = useRef(null);
 
   useEffect(() => {
-    function init() {
-      if (window.Konfigra && typeof window.Konfigra.render === "function") {
-        window.Konfigra.render({
-          element: mountRef.current,
-          publicKey: "${pk}",
-          configId: "${id}"
-        });
-      }
-    }
+    if (!mountRef.current) return;
 
-    const existing = document.getElementById("konfigra-embed-script");
-    if (!existing) {
-      const s = document.createElement("script");
-      s.id = "konfigra-embed-script";
-      s.src = "https://cdn.konfigra.com/embed.js";
-      s.async = true;
-      s.onload = init;
-      document.head.appendChild(s);
-    } else {
-      init();
-    }
+    const containerId = "konfigra-root-${id}";
+    mountRef.current.id = containerId;
+
+    const existing = document.querySelector(
+      'script[data-configurator-id="${id}"]'
+    );
+    if (existing) return;
+
+    const s = document.createElement("script");
+    s.src = "${embedUrl}/embed/script.js";
+    s.async = true;
+    s.setAttribute("data-public-key", "${pk}");
+    s.setAttribute("data-configurator-id", "${id}");
+    s.setAttribute("data-container-id", containerId);
+    mountRef.current.appendChild(s);
 
     return () => {
-      if (mountRef.current && window.Konfigra && typeof window.Konfigra.unmount === "function") {
-        try { window.Konfigra.unmount({ element: mountRef.current }); } catch (e) {}
+      if (mountRef.current) {
+        mountRef.current.innerHTML = "";
       }
-    };
+    }
   }, []);
 
-  return <div ref={mountRef} id={"konfigra-root-${id}"} />;
+  return <div ref={mountRef} />;
 }
 `;
 
@@ -219,32 +190,25 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 const mountEl = ref(null);
 
 onMounted(() => {
-  function init() {
-    if (window.Konfigra && typeof window.Konfigra.render === "function") {
-      window.Konfigra.render({
-        element: mountEl.value,
-        publicKey: "${pk}",
-        configId: "${id}"
-      });
-    }
-  }
+  if (!mountEl.value) return;
+  const containerId = "konfigra-root-${id}";
+  mountEl.value.id = containerId;
 
-  const existing = document.getElementById("konfigra-embed-script");
-  if (!existing) {
-    const s = document.createElement("script");
-    s.id = "konfigra-embed-script";
-    s.src = "https://cdn.konfigra.com/embed.js";
-    s.async = true;
-    s.onload = init;
-    document.head.appendChild(s);
-  } else {
-    init();
-  }
+  const existing = document.querySelector('script[data-configurator-id="${id}"]');
+  if (existing) return;
+
+  const s = document.createElement("script");
+  s.src = "${embedUrl}/embed/script.js";
+  s.async = true;
+  s.setAttribute("data-public-key", "${pk}");
+  s.setAttribute("data-configurator-id", "${id}");
+  s.setAttribute("data-container-id", containerId);
+  mountEl.value.appendChild(s);
 });
 
 onBeforeUnmount(() => {
-  if (mountEl.value && window.Konfigra && typeof window.Konfigra.unmount === "function") {
-    try { window.Konfigra.unmount({ element: mountEl.value }); } catch (e) {}
+  if (mountEl.value) {
+    mountEl.value.innerHTML = "";
   }
 });
 </script>
@@ -260,33 +224,26 @@ onBeforeUnmount(() => {
   import { onMount, onDestroy } from "svelte";
   let mountEl;
 
-  function init() {
-    if (window.Konfigra && typeof window.Konfigra.render === "function") {
-      window.Konfigra.render({
-        element: mountEl,
-        publicKey: "${pk}",
-        configId: "${id}"
-      });
-    }
-  }
-
   onMount(() => {
-    const existing = document.getElementById("konfigra-embed-script");
-    if (!existing) {
-      const s = document.createElement("script");
-      s.id = "konfigra-embed-script";
-      s.src = "https://cdn.konfigra.com/embed.js";
-      s.async = true;
-      s.onload = init;
-      document.head.appendChild(s);
-    } else {
-      init();
-    }
+    if (!mountEl) return;
+    const containerId = "konfigra-root-${id}";
+    mountEl.id = containerId;
+
+    const existing = document.querySelector('script[data-configurator-id="${id}"]');
+    if (existing) return;
+
+    const s = document.createElement("script");
+    s.src = "${embedUrl}/embed/script.js";
+    s.async = true;
+    s.setAttribute("data-public-key", "${pk}");
+    s.setAttribute("data-configurator-id", "${id}");
+    s.setAttribute("data-container-id", containerId);
+    mountEl.appendChild(s);
   });
 
   onDestroy(() => {
-    if (mountEl && window.Konfigra && typeof window.Konfigra.unmount === "function") {
-      try { window.Konfigra.unmount({ element: mountEl }); } catch (e) {}
+    if (mountEl) {
+      mountEl.innerHTML = "";
     }
   });
 </script>
@@ -297,29 +254,11 @@ onBeforeUnmount(() => {
     case "wordpress":
       return `<!-- WordPress: script tag -->
 <div id="konfigra-root-${id}"></div>
-<script>
-  (function () {
-    function init() {
-      if (window.Konfigra && typeof window.Konfigra.render === "function") {
-        window.Konfigra.render({
-          element: "#konfigra-root-${id}",
-          publicKey: "${pk}",
-          configId: "${id}"
-        });
-      }
-    }
-
-    if (!document.getElementById("konfigra-embed-script")) {
-      var s = document.createElement("script");
-      s.id = "konfigra-embed-script";
-      s.src = "https://cdn.konfigra.com/embed.js";
-      s.async = true;
-      s.onload = init;
-      document.head.appendChild(s);
-    } else {
-      init();
-    }
-  })();
+<script
+  src="${embedUrl}/embed/script.js"
+  data-public-key="${pk}"
+  data-configurator-id="${id}"
+  data-container-id="konfigra-root-${id}">
 </script>
 
 <!-- WordPress: shortcode example (functions.php)
@@ -333,21 +272,13 @@ function konfigra_shortcode($atts) {
   return '<div id="konfigra-root-'.esc_attr($a['id']).'"></div>
   <script>
     (function(){
-      function init(){
-        if(window.Konfigra && typeof window.Konfigra.render === "function"){
-          window.Konfigra.render({ element: "#konfigra-root-'.esc_attr($a['id']).'", publicKey: "'.esc_attr($a['public_key']).'", configId: "'.esc_attr($a['id']).'" });
-        }
-      }
-      if(!document.getElementById("konfigra-embed-script")){
-        var s = document.createElement("script");
-        s.id = "konfigra-embed-script";
-        s.src = "https://cdn.konfigra.com/embed.js";
-        s.async = true;
-        s.onload = init;
-        document.head.appendChild(s);
-      } else {
-        init();
-      }
+      var s = document.createElement("script");
+      s.src = "${embedUrl}/embed/script.js";
+      s.async = true;
+      s.setAttribute("data-public-key", "'.esc_attr($a['public_key']).'");
+      s.setAttribute("data-configurator-id", "'.esc_attr($a['id']).'");
+      s.setAttribute("data-container-id", "konfigra-root-'.esc_attr($a['id']).'");
+      document.currentScript.parentNode.insertBefore(s, document.currentScript);
     })();
   <\/script>';
 }
@@ -357,7 +288,7 @@ Use in editor: [konfigra id="${id}" public_key="${pk}"]
 -->
 `;
     default:
-      return `<!-- fallback -->\n${generateFrameworkSnippet("vanilla", publicKey, publicId, name)}`;
+      return `<!-- fallback -->\n${generateFrameworkSnippet("vanilla", publicKey, publicId)}`;
   }
 }
 
@@ -445,8 +376,8 @@ export default function EmbedPage() {
       <h1 className="text-3xl font-bold tracking-tight mb-2">Embed Script</h1>
       <p className="text-muted-foreground mb-8">
         Integrate your configurators into any website. Choose a framework per
-        configurator to get a tailored snippet (all snippets use the same CDN
-        script).
+        configurator to get a tailored snippet (all snippets use the same embed
+        loader script).
       </p>
 
       <div className="grid gap-6 max-w-4xl">
@@ -463,7 +394,6 @@ export default function EmbedPage() {
             selectedFramework,
             pk,
             cfg.publicId,
-            cfg.name,
           );
 
           return (
